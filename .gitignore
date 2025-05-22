@@ -1,0 +1,54 @@
+﻿# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+bin/
+obj/
+Debug/
+Release/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+*.nuget.props
+*.nuget.targets
+
+# Entity Framework migrations snapshot / Designer
+*/Migrations/*.Designer.cs
+*/Migrations/*Snapshot.cs
+
+# Database files & caches
+*.db
+*.db-shm
+*.db-wal
+*.dtbcache.v2
+*.vsidx
+CodeChunks.db*
+SemanticSymbols.db*
+startup_ui_error.log
+
+# Logs
+*.txt
+ApplicationLog.txt
+RunTimeLog/*.txt
+
+# User-specific files
+*.csproj.user
+*.cache
+*.global.json
+*_wpftmp.*
+
+# OS files
+Thumbs.db
+.DS_Store

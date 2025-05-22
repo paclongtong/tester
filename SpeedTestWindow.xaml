@@ -1,0 +1,36 @@
+﻿<Window x:Class="friction_tester.SpeedTestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        Title="{DynamicResource SpeedTest}" Height="450" Width="900">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <!-- Left Column: Input controls -->
+        <StackPanel Grid.Column="0" Margin="5">
+            <TextBlock Text="{DynamicResource Start}" Margin="5"/>
+            <TextBox x:Name="StartPositionInput" Margin="5"/>
+
+            <TextBlock Text="{DynamicResource End}" Margin="5"/>
+            <TextBox x:Name="EndPositionInput" Margin="5"/>
+
+            <TextBlock Text="{DynamicResource Velocity}" Margin="5"/>
+            <TextBox x:Name="SpeedInput" Margin="5"/>
+
+            <TextBlock Text="{DynamicResource Acceleration}" Margin="5"/>
+            <TextBox x:Name="AccelerationInput" Margin="5"/>
+
+            <!--<TextBlock Text="Precision Threshold:" Margin="5"/>
+            <TextBox x:Name="PrecisionInput" Margin="5"/>-->
+
+            <TextBlock Text="{DynamicResource Repetitions}" Margin="5"/>
+            <TextBox x:Name="RepetitionInput" Margin="5"/>
+
+            <Button Content="{DynamicResource StartTest}" Margin="5" Height="30" Click="StartTestButton_Click"/>
+        </StackPanel>
+        <!-- Right Column: OxyPlot chart -->
+        <oxy:PlotView Grid.Column="1" Model="{Binding FrictionPlotModel}" Margin="5"/>
+    </Grid>
+</Window>

@@ -1,0 +1,15 @@
+﻿<Application x:Class="friction_tester.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:friction_tester"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Load default language (English as default) -->
+                <ResourceDictionary Source="Resources/Strings.zh-CN.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <!-- Other global resources can go here -->
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

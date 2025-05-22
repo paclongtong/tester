@@ -1,0 +1,65 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="HardLimitEnable">Hard Limit Enable</sys:String>
+    <sys:String x:Key="LanguageSelect">Language Select</sys:String>
+    <sys:String x:Key="HomeReturnSpeed">Home Return Speed (mm/s)</sys:String>
+    <sys:String x:Key="SoftLimitMin">Soft Limit Min</sys:String>
+    <sys:String x:Key="SoftLimitMax">Soft Limit Max</sys:String>
+    <sys:String x:Key="SaveSettings">Save Settings</sys:String>
+    <sys:String x:Key="FrictionTest">Friction Test</sys:String>
+    <sys:String x:Key="SpeedTest">Speed Test</sys:String>
+    <sys:String x:Key="DefineOrigin">Define Origin (don't click it if not changing)</sys:String>
+    <sys:String x:Key="Velocity">Velocity (mm/s)</sys:String>
+    <sys:String x:Key="Acceleration">Acceleration (mm/s^2)</sys:String>
+    <sys:String x:Key="Start">Start (mm)</sys:String>
+    <sys:String x:Key="End">End (mm)</sys:String>
+    <sys:String x:Key="StartAutoTest">Start Automatic Test</sys:String>
+    <sys:String x:Key="Stop">Stop</sys:String>
+    <sys:String x:Key="ResetOrigin">Reset and Back to Origin</sys:String>
+    <sys:String x:Key="JogP">Jog P</sys:String>
+    <sys:String x:Key="JogN">Jog N</sys:String>
+    <sys:String x:Key="HandwheelOpen">Handwheel: Open</sys:String>
+    <sys:String x:Key="HandwheelClose">Handwheel: Close</sys:String>
+    <sys:String x:Key="Database">📊 Database</sys:String>
+    <sys:String x:Key="Settings">⚙ Settings</sys:String>
+    <sys:String x:Key="FrictionDisplacementChart">Friction / Displacement Chart</sys:String>
+    <sys:String x:Key="SearchByTestName">Search by Test Name</sys:String>
+    <sys:String x:Key="Search">Search</sys:String>
+    <sys:String x:Key="Refresh">Refresh</sys:String>
+    <sys:String x:Key="TestName">Test Name</sys:String>
+    <sys:String x:Key="Timestamp">Timestamp</sys:String>
+    <sys:String x:Key="Speed">Speed</sys:String>
+    <sys:String x:Key="StartPosition">Start Position</sys:String>
+    <sys:String x:Key="EndPosition">End Position</sys:String>
+    <sys:String x:Key="Friction">Friction</sys:String>
+    <sys:String x:Key="Displacement">Displacement</sys:String>
+    <sys:String x:Key="DeleteSelected">Delete Selected</sys:String>
+    <sys:String x:Key="DisplayResult">Display Result</sys:String>
+    <sys:String x:Key="OutputImage">Output Image</sys:String>
+
+    <sys:String x:Key="GuideModel">Guide Model</sys:String>
+    <sys:String x:Key="Preload">Preload</sys:String>
+    <sys:String x:Key="SealLubrication">Seal Lubrication</sys:String>
+    <sys:String x:Key="TestDuration">Test Duration</sys:String>
+    <sys:String x:Key="PrintResult">Print Result</sys:String>
+    <sys:String x:Key="Repetitions">Repetitions</sys:String>
+    <sys:String x:Key="StartTest">Start Testing</sys:String>
+
+    <sys:String x:Key="FrictionTester">Friction Tester</sys:String>
+
+
+    <sys:String x:Key="AutoTestBlocked">Automatic test start blocked: Handwheel mode is active. Please disable handwheel mode first.</sys:String>
+    <sys:String x:Key="AutoModeError">Error in automatic mode, please check the log.</sys:String>
+    <sys:String x:Key="Error">Error</sys:String>
+    <sys:String x:Key="HomingError">Error occurred during homing, error details:</sys:String>
+    <sys:String x:Key="MotionControllerOpenFail">Failed to open motion controller!</sys:String>
+    <sys:String x:Key="MotionControllerOpenSuccess">Motion controller opened successfully!</sys:String>
+    <sys:String x:Key="EtherCATInitFail">EtherCAT initialization failed</sys:String>
+    <sys:String x:Key="EtherCATInitSuccess">EtherCAT initialized successfully</sys:String>
+    <sys:String x:Key="HandwheelIgnoreStop">Ignoring stop button in handwheel mode</sys:String>
+    <sys:String x:Key="SetOriginFail">Failed to set origin parameters</sys:String>
+    <sys:String x:Key="StartHomingFail">Failed to start homing</sys:String>
+
+</ResourceDictionary>

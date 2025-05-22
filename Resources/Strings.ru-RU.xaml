@@ -1,0 +1,65 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="GuideModel">Модель направляющей</sys:String>
+    <sys:String x:Key="Preload">Преднагрузка</sys:String>
+    <sys:String x:Key="SealLubrication">Смазка уплотнений</sys:String>
+
+    <sys:String x:Key="HardLimitEnable">Жесткий лимит включен</sys:String>
+    <sys:String x:Key="LanguageSelect">Выбор языка  (language select)</sys:String>
+    <sys:String x:Key="HomeReturnSpeed">Скорость возврата (мм/с)</sys:String>
+    <sys:String x:Key="SoftLimitMin">Минимальный мягкий лимит</sys:String>
+    <sys:String x:Key="SoftLimitMax">Максимальный мягкий лимит</sys:String>
+    <sys:String x:Key="SaveSettings">Сохранить настройки</sys:String>
+    <sys:String x:Key="FrictionTest">Тест на трение</sys:String>
+    <sys:String x:Key="SpeedTest">Тест скорости</sys:String>
+    <sys:String x:Key="DefineOrigin">Определить начальную точку (не нажимайте, если не меняете)</sys:String>
+    <sys:String x:Key="Velocity">Скорость (мм/с)</sys:String>
+    <sys:String x:Key="Acceleration">Ускорение (мм/с²)</sys:String>
+    <sys:String x:Key="Start">Начало (мм)</sys:String>
+    <sys:String x:Key="End">Конец (мм)</sys:String>
+    <sys:String x:Key="StartAutoTest">Запуск автоматического теста</sys:String>
+    <sys:String x:Key="Stop">Остановить</sys:String>
+    <sys:String x:Key="ResetOrigin">Сброс и возврат на начальную точку</sys:String>
+    <sys:String x:Key="JogP">Джог +</sys:String>
+    <sys:String x:Key="JogN">Джог -</sys:String>
+    <sys:String x:Key="HandwheelOpen">Ручное колесо: Включено</sys:String>
+    <sys:String x:Key="HandwheelClose">Ручное колесо: Выключено</sys:String>
+    <sys:String x:Key="Database">📊 База данных</sys:String>
+    <sys:String x:Key="Settings">⚙ Настройки</sys:String>
+    <sys:String x:Key="FrictionDisplacementChart">График трения / смещения</sys:String>
+    <sys:String x:Key="SearchByTestName">Поиск по названию теста</sys:String>
+    <sys:String x:Key="Search">Поиск</sys:String>
+    <sys:String x:Key="Refresh">Обновить</sys:String>
+    <sys:String x:Key="TestName">Название теста</sys:String>
+    <sys:String x:Key="Timestamp">Временная метка</sys:String>
+    <sys:String x:Key="Speed">Скорость</sys:String>
+    <sys:String x:Key="StartPosition">Начальная позиция</sys:String>
+    <sys:String x:Key="EndPosition">Конечная позиция</sys:String>
+    <sys:String x:Key="Friction">Трение</sys:String>
+    <sys:String x:Key="TestDuration">Продолжительность теста</sys:String>
+    <sys:String x:Key="PrintResult">Распечатать результат</sys:String>
+    <sys:String x:Key="Repetition">Повторения</sys:String>
+    <sys:String x:Key="StartTest">Начать тестирование</sys:String>
+    <sys:String x:Key="DeleteSelected">Удалить выбранное</sys:String>
+    <sys:String x:Key="DisplayResult">Отобразить результат</sys:String>
+    <sys:String x:Key="OutputImage">Выходное изображение</sys:String>
+
+    <sys:String x:Key="FrictionTester">Тестер трения</sys:String>
+
+
+    <sys:String x:Key="AutoTestBlocked">Запуск автоматического теста заблокирован: активирован режим ручного колеса. Пожалуйста, отключите режим ручного колеса.</sys:String>
+    <sys:String x:Key="AutoModeError">Ошибка в автоматическом режиме, проверьте журнал.</sys:String>
+    <sys:String x:Key="Error">Ошибка</sys:String>
+    <sys:String x:Key="HomingError">Ошибка при возврате в исходное положение, детали ошибки:</sys:String>
+    <sys:String x:Key="MotionControllerOpenFail">Не удалось открыть контроллер движения!</sys:String>
+    <sys:String x:Key="MotionControllerOpenSuccess">Контроллер движения успешно открыт!</sys:String>
+    <sys:String x:Key="EtherCATInitFail">Ошибка инициализации EtherCAT</sys:String>
+    <sys:String x:Key="EtherCATInitSuccess">EtherCAT успешно инициализирован</sys:String>
+    <sys:String x:Key="HandwheelIgnoreStop">Игнорирование кнопки остановки в режиме ручного колеса</sys:String>
+    <sys:String x:Key="SetOriginFail">Ошибка установки параметров начальной точки</sys:String>
+    <sys:String x:Key="StartHomingFail">Ошибка запуска возврата в исходное положение</sys:String>
+
+
+</ResourceDictionary>
