@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
         Title="{DynamicResource FrictionTester}"
-        Height="800" Width="1000"
+        Height="900" Width="1200"
         Background="#F2F2F2">
 
     <!-- Main container -->
@@ -45,156 +45,220 @@
             </Grid.ColumnDefinitions>
 
             <!-- Left Panel (Column 0) -->
-            <StackPanel Grid.Column="0"
-                        Orientation="Vertical"
-                        Margin="10">
-                <!-- Input Fields -->
-                <TextBlock Text="{DynamicResource GuideModel}"
-                           FontWeight="Bold" FontSize="16"
-                           Margin="0,5,0,0"/>
-                <TextBox x:Name="GuideModelInput"
-                         Text="test35"
-                         FontSize="16" Height="30" Margin="0,5,0,10"/>
+            <Grid Grid.Column="0" Margin="10">
+                <Grid.RowDefinitions>
+                    <!-- 7 input rows -->
+                    <RowDefinition Height="*" MinHeight="70"/>
+                    <RowDefinition Height="*" MinHeight="70"/>
+                    <RowDefinition Height="*" MinHeight="70"/>
+                    <RowDefinition Height="*" MinHeight="70"/>
+                    <RowDefinition Height="*" MinHeight="70"/>
+                    <RowDefinition Height="*" MinHeight="70"/>
+                    <RowDefinition Height="*" MinHeight="70"/>
+                    <!-- 1 row for Start/Stop/Reset -->
+                    <RowDefinition Height="*" MinHeight="150"/>
+                    <!-- 1 row for Jog controls -->
+                    <RowDefinition Height="*" MinHeight="40"/>
+                    <RowDefinition Height="Auto"/>
+                    <!-- row 9: reset estop -->
+                </Grid.RowDefinitions>
 
-                <TextBlock Text="{DynamicResource Preload}"
-                           FontWeight="Bold" FontSize="16"/>
-                <TextBox x:Name="PreloadInput"
-                         Text="test2"
-                         FontSize="16" Height="30" Margin="0,5,0,10"/>
-
-                <TextBlock Text="{DynamicResource SealLubrication}"
-                           FontWeight="Bold" FontSize="16"/>
-                <TextBox x:Name="SealLubricationInput"
-                         Text="test3"
-                         FontSize="16" Height="30" Margin="0,5,0,10"/>
-
-                <TextBlock Text="{DynamicResource Velocity}"
-                           FontWeight="Bold" FontSize="16"/>
-                <TextBox x:Name="SpeedInputFriction"
-                         Text="50"
-                         FontSize="16" Height="30" Margin="0,5,0,10"/>
-
-                <TextBlock Text="{DynamicResource Acceleration}"
-                           FontWeight="Bold" FontSize="16"/>
-                <TextBox x:Name="AccelerationInputFriction"
-                         Text="1"
-                         FontSize="16" Height="30" Margin="0,5,0,10"/>
-
-                <TextBlock Text="{DynamicResource Start}"
-                           FontWeight="Bold" FontSize="16"/>
-                <TextBox x:Name="StartPositionInput"
-                         Text="0"
-                         FontSize="16" Height="30" Margin="0,5,0,10"/>
-
-                <TextBlock Text="{DynamicResource End}"
-                           FontWeight="Bold" FontSize="16"/>
-                <TextBox x:Name="EndPositionInput"
-                         Text="200"
-                         FontSize="16" Height="30"
-                         Margin="0,5,0,10"
-                         TextChanged="EndPositionInput_TextChanged"/>
-
-                <!-- Action Buttons -->
-                <Button Content="{DynamicResource StartAutoTest}"
-                        x:Name="StartAutoButtonFriction"
-                        Height="40" Width="200"
-                        FontSize="16" FontWeight="Bold"
-                        Background="#9dacff"
-                        Foreground="White"
-                        Margin="0,10,0,0"
-                        Click="StartAutoButtonFriction_Click"/>
-
-                <Button Content="{DynamicResource Stop}"
-                        x:Name="EmergencyStopButtonFriction"
-                        Height="40" Width="200"
-                        FontSize="16" FontWeight="Bold"
-                        Background="#ff3c38"
-                        Foreground="White"
-                        Margin="0,10,0,0"
-                        Click="EmergencyStopButtonFriction_Click"/>
-
-                <Button x:Name="ResetButton"
-                        Content="{DynamicResource ResetOrigin}"
-                        Height="40" Width="200"
-                        FontSize="16" FontWeight="Bold"
-                        Background="#434a4d"
-                        Foreground="White"
-                        Margin="0,10,0,0"
-                        Click="ResetButton_Click"/>
-
-                <!-- Jog Controls (Horizontal StackPanel) -->
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center"
-                            Margin="0,10,0,0">
-                    <Button x:Name="JogP" Width="80"
-                            Content="{DynamicResource JogP}"
-                            Click="JogP_Click"/>
-                    <Button x:Name="JogN" Width="80"
-                            Content="{DynamicResource JogN}"
-                            Margin="10,0,0,0"
-                            Click="JogN_Click"/>
-
+                <!-- 0: Guide Model -->
+                <StackPanel Grid.Row="0" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource GuideModel}"
+                   FontWeight="Bold" FontSize="16"
+                   Margin="0,5,0,0"/>
+                    <TextBox x:Name="GuideModelInput"
+                 Text="test35"
+                 FontSize="16" Height="30"
+                 Margin="0,5,0,10"/>
                 </StackPanel>
 
+                <!-- 1: Preload -->
+                <StackPanel Grid.Row="1" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource Preload}"
+                   FontWeight="Bold" FontSize="16"
+                   Margin="0,5,0,0"/>
+                    <TextBox x:Name="PreloadInput"
+                 Text="test2"
+                 FontSize="16" Height="30"
+                 Margin="0,5,0,10"/>
+                </StackPanel>
 
-            </StackPanel>
+                <!-- 2: Seal Lubrication -->
+                <StackPanel Grid.Row="2" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource SealLubrication}"
+                   FontWeight="Bold" FontSize="16"
+                   Margin="0,5,0,0"/>
+                    <TextBox x:Name="SealLubricationInput"
+                 Text="test3"
+                 FontSize="16" Height="30"
+                 Margin="0,5,0,10"/>
+                </StackPanel>
+
+                <!-- 3: Velocity -->
+                <StackPanel Grid.Row="3" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource Velocity}"
+                   FontWeight="Bold" FontSize="16"
+                   Margin="0,5,0,0"/>
+                    <TextBox x:Name="SpeedInputFriction"
+                 Text="50"
+                 FontSize="16" Height="30"
+                 Margin="0,5,0,10"/>
+                </StackPanel>
+
+                <!-- 4: Acceleration -->
+                <StackPanel Grid.Row="4" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource Acceleration}"
+                   FontWeight="Bold" FontSize="16"
+                   Margin="0,5,0,0"/>
+                    <TextBox x:Name="AccelerationInputFriction"
+                 Text="1"
+                 FontSize="16" Height="30"
+                 Margin="0,5,0,10"/>
+                </StackPanel>
+
+                <!-- 5: Start Position -->
+                <StackPanel Grid.Row="5" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource Start}"
+                   FontWeight="Bold" FontSize="16"
+                   Margin="0,5,0,0"/>
+                    <TextBox x:Name="StartPositionInput"
+                 Text="0"
+                 FontSize="16" Height="30"
+                 Margin="0,5,0,10"/>
+                </StackPanel>
+
+                <!-- 6: End Position -->
+                <StackPanel Grid.Row="6" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource End}"
+                   FontWeight="Bold" FontSize="16"
+                   Margin="0,5,0,0"/>
+                    <TextBox x:Name="EndPositionInput"
+                 Text="200"
+                 FontSize="16" Height="30"
+                 Margin="0,5,0,10"
+                 TextChanged="EndPositionInput_TextChanged"/>
+                </StackPanel>
+
+                <!-- 7: Start / Stop / Reset -->
+                <StackPanel Grid.Row="7"
+                Orientation="Vertical"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                    <Button Content="{DynamicResource StartAutoTest}"
+                x:Name="StartAutoButtonFriction"
+                Height="40" Width="200"
+                FontSize="16" FontWeight="Bold"
+                Background="#9dacff" Foreground="White"
+                Margin="0,10,0,0"
+                Click="StartAutoButtonFriction_Click"/>
+                    <Button Content="{DynamicResource Stop}"
+                x:Name="EmergencyStopButtonFriction"
+                Height="40" Width="200"
+                FontSize="16" FontWeight="Bold"
+                Background="#ff3c38" Foreground="White"
+                Margin="0,10,0,0"
+                Click="EmergencyStopButtonFriction_Click"/>
+                    <Button x:Name="ResetButton"
+                Content="{DynamicResource ResetOrigin}"
+                Height="40" Width="200"
+                FontSize="16" FontWeight="Bold"
+                Background="#434a4d" Foreground="White"
+                Margin="0,10,0,0"
+                Click="ResetButton_Click"/>
+                </StackPanel>
+
+                <!-- 8: Jog Controls -->
+                <StackPanel Grid.Row="8"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                    <Button x:Name="JogP" Width="80"
+                Content="{DynamicResource JogP}"
+                Click="JogP_Click"/>
+                    <Button x:Name="JogN" Width="80"
+                Content="{DynamicResource JogN}"
+                Margin="10,0,0,0"
+                Click="JogN_Click"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="9"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                    <Button x:Name="ResetEstop" Width="170"
+                Content="{DynamicResource ResetEStop}"
+                Click="ResetEstop_Click"/>
+                </StackPanel>
+            </Grid>
+
+
 
             <!-- Right Panel (Column 1) -->
-            <StackPanel Grid.Column="1"
-                        Orientation="Vertical"
-                        Margin="10">
-                <!-- Chart Title -->
-                <TextBlock Text="{DynamicResource FrictionDisplacementChart}"
-                           FontWeight="Bold"
-                           FontSize="16"
-                           Margin="0,0,0,10"/>
+            <DockPanel Grid.Column="1"
+           Margin="10">
 
-                <!-- Chart -->
-                <Border BorderBrush="Gray" BorderThickness="1" Margin="0,0,0,10">
+                <!-- Chart Title docked at the very top -->
+                <TextBlock DockPanel.Dock="Top"
+               Text="{DynamicResource FrictionDisplacementChart}"
+               FontWeight="Bold"
+               FontSize="16"
+               Margin="0,0,0,10"/>
+
+                <!-- Database & Settings docked at the bottom -->
+                <StackPanel DockPanel.Dock="Bottom"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Margin="0,10,0,0">
+                    <Button x:Name="OpenDatabaseButton"
+                Content="{DynamicResource Database}"
+                Width="250" Height="50"
+                FontSize="16" FontWeight="Bold"
+                Margin="50"
+                Click="OpenDatabaseButton_Click"/>
+                    <Button x:Name="SettingButton"
+                Content="{DynamicResource Settings}"
+                Width="250" Height="50"
+                FontSize="16" FontWeight="Bold"
+                Margin="50"
+                Click="Button_Click"/>
+                </StackPanel>
+
+                <!-- Handwheel / Define Origin / Print Result docked just above that -->
+                <StackPanel DockPanel.Dock="Bottom"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Margin="0,10,0,0">
+                    <Button x:Name="HandwheelButton"
+                Content="{DynamicResource HandwheelClose}"
+                Width="150" Height="40"
+                Margin="10,0,0,0"
+                Click="HandWheelButton_Click"/>
+                    <Button Content="{DynamicResource DefineOrigin}"
+                Width="200" Height="40"
+                Margin="20"
+                Click="Button_Click_2"/>
+                    <Button x:Name="PrintResultButton"
+                Content="{DynamicResource PrintResult}"
+                Width="200" Height="40"
+                FontWeight="Bold"
+                Margin="20"
+                Click="PrintResultButton_Click"/>
+                </StackPanel>
+
+                <!-- Chart fills all remaining space -->
+                <Border BorderBrush="Gray"
+            BorderThickness="1"
+            Margin="0,0,0,10">
                     <oxy:PlotView Name="FrictionPlot"
-                                  Model="{Binding FrictionPlotModel}"
-                                  MinHeight="300"
-                                  MinWidth="400"/>
+                      Model="{Binding FrictionPlotModel}"
+                      MinHeight="300"
+                      MinWidth="400"/>
                 </Border>
 
-                <!-- Print and Other Buttons -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button x:Name="HandwheelButton"
-                            Content="{DynamicResource HandwheelClose}"
-                            Width="150" Height="40"
-                            Margin="10,0,0,0"
-                            Click="HandWheelButton_Click"/>
-                    <!-- Define Origin Button (Optional) -->
-                    <Button Content="{DynamicResource DefineOrigin}"
-                        Margin="20"
-                        Width="200" Height="40"
-                        Click="Button_Click_2"/>
-                    <Button x:Name="PrintResultButton"
-                        Content="{DynamicResource PrintResult}"
-                        Height="40" Width="200" FontWeight="Bold"
-                        Margin="20"
-                        Click="PrintResultButton_Click"/>
+            </DockPanel>
 
-
-
-                </StackPanel>
-
-                <!-- Database and Settings -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button x:Name="OpenDatabaseButton"
-                            Content="{DynamicResource Database}"
-                            Width="250" Height="50"
-                            FontSize="16" FontWeight="Bold"
-                            Margin="50"
-                            Click="OpenDatabaseButton_Click"/>
-                    <Button x:Name="SettingButton"
-                            Content="{DynamicResource Settings}"
-                            Width="250" Height="50"
-                            FontSize="16" FontWeight="Bold"
-                            Margin="50"
-                            Click="Button_Click"/>
-                </StackPanel>
-            </StackPanel>
         </Grid>
     </Grid>
 </Window>

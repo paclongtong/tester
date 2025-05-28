@@ -49,26 +49,18 @@ namespace friction_tester
             for (int i = 0; i < repetitions; i++)
             {
                 // Move to the start position.
-                _motionController.MoveToPosition(startPos, maxVelocity, acceleration);
+                await _motionController.MoveToPositionAsync(startPos * 1000, maxVelocity, acceleration); // 1000 pulses per mm by default
                 //while (Math.Abs(_motionController.GetCurrentPosition() - startPos) > precision)
                 //{
                 //    await Task.Delay(10);
                 //}
-                while(!_motionController.IsMovementDone())
-                {
-                    await Task.Delay(10);
-                }
 
                 // Move to the end position.
-                _motionController.MoveToPosition(endPos, maxVelocity, acceleration);
+                await _motionController.MoveToPositionAsync(endPos * 1000, maxVelocity, acceleration); // 1000 pulses per mm by default
                 //while (Math.Abs(_motionController.GetCurrentPosition() - endPos) > precision)
                 //{
                 //    await Task.Delay(10);
                 //}
-                while (!_motionController.IsMovementDone())
-                {
-                    await Task.Delay(10);
-                }
             }
 
             Logger.Log("Speed test completed.");

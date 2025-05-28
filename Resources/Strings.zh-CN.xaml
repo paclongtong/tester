@@ -8,8 +8,8 @@
     <sys:String x:Key="HardLimitEnable">硬限位使能</sys:String>
     <sys:String x:Key="LanguageSelect">语言选择 (language select)</sys:String>
     <sys:String x:Key="HomeReturnSpeed">归零速度 (毫米/秒)</sys:String>
-    <sys:String x:Key="SoftLimitMin">软限位最小值</sys:String>
-    <sys:String x:Key="SoftLimitMax">软限位最大值</sys:String>
+    <sys:String x:Key="SoftLimitMin">软限位最小值 (mm)</sys:String>
+    <sys:String x:Key="SoftLimitMax">软限位最大值 (mm)</sys:String>
     <sys:String x:Key="SaveSettings">保存设置</sys:String>
     <sys:String x:Key="FrictionTest">摩擦测试</sys:String>
     <sys:String x:Key="SpeedTest">速度测试</sys:String>
@@ -60,6 +60,7 @@
     <sys:String x:Key="PrintResult">输出结果图片</sys:String>
     <sys:String x:Key="Repetitions">重复次数</sys:String>
     <sys:String x:Key="StartTest">开始测试</sys:String>
+    <sys:String x:Key="ResetEStop">重置急停状态</sys:String>
 
 
 

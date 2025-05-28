@@ -11,6 +11,7 @@ namespace friction_tester
         MultiCardCS.MultiCardCS _motionCard { get; set; }
         void SetOrigin(short numStation);
         void MoveToPosition(double position, int maxVelocity, double acceleration);
+        Task MoveToPositionAsync(double position, int maxVelocity, double acceleration);
         double GetCurrentPosition();
         bool IsMovementDone();
         void Stop();
@@ -25,6 +26,14 @@ namespace friction_tester
         bool IsHandwheelMode { get; set; }
 
         void HandleExternalInput(int inputCode);
+
+        void StartJoystickMode(short axisNum);
+
+        void EndJoystickMode(short axisNum);
+        void StartEStopMonitor();
+
+        void ResetEStop();
+        event Action OnEStopTriggered;
 
     }
 

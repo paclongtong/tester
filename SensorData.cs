@@ -45,5 +45,17 @@ namespace friction_tester
         public TestResult TestResult { get; set; }
     }
 
+    public class TimestampedSensorData
+    {
+        public double Position { get; set; }
+        public double SensorValue { get; set; }
+        public DateTime Timestamp { get; set; }
+        public long MotionControllerTick { get; set; } // High-resolution timing from motion controller
+        public bool IsValid { get; set; } = true;
+        public string QualityFlag { get; set; } = "Good";
+        public double PositionError { get; set; } // Difference between commanded and actual position
+        public uint AxisStatus { get; set; } // Motion controller status
+    }
+
 }
 

@@ -35,67 +35,62 @@ namespace friction_tester
             _repository = new TestResultsRepository();
         }
 
-        public Task StartAutomaticTest(double speed, double acceleration, double x1, double x2, string workpieceName)
+        public async Task StartAutomaticTest(double speed, double acceleration, double x1, double x2, string workpieceName)
         {
             if (_motorController.IsHandwheelMode)
             {
                 Logger.Log("Automatic test start blocked: Handwheel mode is active.");
                 MessageBox.Show("自动测试开始被阻止：手轮模式已激活，请先关闭手轮模式 | Disable Handwheel first");
-                return Task.CompletedTask;
+                return;
             }
 
             OnTestStarted?.Invoke(); // Notify UI that test is starting
 
             var testName = $"{workpieceName}_{DateTime.Now:yyyyMMddHHmmss}";
 
-            return Task.Run(async() =>
+            try
             {
-                try
+                Logger.Log($"Moving to start position: {x1}mm");
+                await _motorController.MoveToPositionAsync(x1 * 1000, (int)speed, acceleration); // question
+                _motorController.HandleExternalInput(1);
+                Logger.Log($"Moving to end position: {x2}mm with data collection");
+                var moveTask = _motorController.MoveToPositionAsync(x2 * 1000, (int)speed, acceleration);
+                while (!_motorController.IsMovementDone())
                 {
-                    _motorController.MoveToPosition(x1 * 1000, (int)speed, acceleration); // question
-                    _motorController.HandleExternalInput(1);
-                    while (!_motorController.IsMovementDone())
+                    double position = _motorController.GetCurrentPosition() / 1000;
+                    SensorData data = null;
+                    try
                     {
-                        await Task.Delay(10);
-                    }
-                    _motorController.MoveToPosition(x2 * 1000, (int)speed, acceleration);
-                    while (!_motorController.IsMovementDone())
-                    {
-                        double position = _motorController.GetCurrentPosition() / 1000;
-                        SensorData data = null;
-                        try
-                        {
-                            data = _dataAcquisition.CollectDataAtPosition(position);
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.LogException(ex); // Log the issue
-                                                     // Optionally: You can also log to the UI, set a warning flag, etc.
-                            continue; // Skip this data point and continue motion
-                        }
+                        data = await _dataAcquisition.CollectDataAtPositionAsync(position);
                         if (data != null)
                             OnDataCollected?.Invoke(data);
-                        await Task.Delay(10); // Non-blocking delay
                     }
-
-                    var sensorDataList = _dataAcquisition.GetBuffer();
-                    await StoreTestResultAsync(sensorDataList, testName, speed, acceleration, x1, x2, workpieceName);
-                    _motorController.HandleExternalInput(2);
-                    Logger.Log($"Test completed successfully: {testName}");
-                    _dataAcquisition.ClearBuffer();
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex); // Log the issue
+                                                    // Optionally: You can also log to the UI, set a warning flag, etc.
+                        continue; // Skip this data point and continue motion
+                    }
+                    await Task.Delay(10); // Non-blocking delay
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("自动模式运行时出错，请检查日志 Error occurred, please check logs", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Logger.LogException(ex);
-                    OnTestCompleted?.Invoke();
-                }
-                finally
-                {
-                    OnTestCompleted?.Invoke();
-                }
-            }, _cancellationTokenSource.Token);
-
+                await moveTask; // Ensure the move task is completed
+                var sensorDataList = _dataAcquisition.GetBuffer();
+                await StoreTestResultAsync(sensorDataList, testName, speed, acceleration, x1, x2, workpieceName);
+                _motorController.HandleExternalInput(2);
+                Logger.Log($"Test completed successfully: {testName}");
+                _dataAcquisition.ClearBuffer();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("自动模式运行时出错，请检查日志 Error occurred, please check logs", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                Logger.LogException(ex);
+                //OnTestCompleted?.Invoke();
+                throw; // Rethrow the exception to be handled by the caller
+            }
+            finally
+            {
+                OnTestCompleted?.Invoke();
+            }
 
         }
 

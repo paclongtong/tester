@@ -5,8 +5,8 @@
     <sys:String x:Key="HardLimitEnable">Hard Limit Enable</sys:String>
     <sys:String x:Key="LanguageSelect">Language Select</sys:String>
     <sys:String x:Key="HomeReturnSpeed">Home Return Speed (mm/s)</sys:String>
-    <sys:String x:Key="SoftLimitMin">Soft Limit Min</sys:String>
-    <sys:String x:Key="SoftLimitMax">Soft Limit Max</sys:String>
+    <sys:String x:Key="SoftLimitMin">Soft Limit Min (mm)</sys:String>
+    <sys:String x:Key="SoftLimitMax">Soft Limit Max (mm)</sys:String>
     <sys:String x:Key="SaveSettings">Save Settings</sys:String>
     <sys:String x:Key="FrictionTest">Friction Test</sys:String>
     <sys:String x:Key="SpeedTest">Speed Test</sys:String>
@@ -61,5 +61,7 @@
     <sys:String x:Key="HandwheelIgnoreStop">Ignoring stop button in handwheel mode</sys:String>
     <sys:String x:Key="SetOriginFail">Failed to set origin parameters</sys:String>
     <sys:String x:Key="StartHomingFail">Failed to start homing</sys:String>
+
+    <sys:String x:Key="ResetEStop">Reset E-Stop</sys:String>
 
 </ResourceDictionary>

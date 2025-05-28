@@ -12,6 +12,7 @@ public class SimulatedMotionController : IMotionController
     private double _currentPosition = 0;
     private bool _isMoving = false;
     private CancellationTokenSource _cancellationTokenSource;
+    public event Action OnEStopTriggered;
     public MultiCardCS.MultiCardCS _motionCard { get; set; }
     public bool IsHandwheelMode { get; set; } = false; // Default to automatic mode
 
@@ -75,5 +76,23 @@ public class SimulatedMotionController : IMotionController
     public void HandleExternalInput(int inputCode)
     { return; }
 
+    public Task MoveToPositionAsync(double position, int maxVelocity, double acceleration)
+    {
+        MoveToPosition(position, maxVelocity, acceleration);
+        return Task.CompletedTask;
+    }
+    public void StartJoystickMode(short axisNum)
+    {
+        return; // Simulated controller does not support joystick mode
+    }
+
+    public void EndJoystickMode(short axisNum)
+    {
+        return; // Simulated controller does not support joystick mode
+    }
+
+    public void StartEStopMonitor() { return; } // Simulated controller does not support E-Stop monitoring
+
+    public void ResetEStop() { return; } // Simulated controller does not support E-Stop reset
 }
 

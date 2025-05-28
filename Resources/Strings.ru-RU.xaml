@@ -9,8 +9,8 @@
     <sys:String x:Key="HardLimitEnable">Жесткий лимит включен</sys:String>
     <sys:String x:Key="LanguageSelect">Выбор языка  (language select)</sys:String>
     <sys:String x:Key="HomeReturnSpeed">Скорость возврата (мм/с)</sys:String>
-    <sys:String x:Key="SoftLimitMin">Минимальный мягкий лимит</sys:String>
-    <sys:String x:Key="SoftLimitMax">Максимальный мягкий лимит</sys:String>
+    <sys:String x:Key="SoftLimitMin">Минимальный мягкий лимит (mm)</sys:String>
+    <sys:String x:Key="SoftLimitMax">Максимальный мягкий лимит (mm)</sys:String>
     <sys:String x:Key="SaveSettings">Сохранить настройки</sys:String>
     <sys:String x:Key="FrictionTest">Тест на трение</sys:String>
     <sys:String x:Key="SpeedTest">Тест скорости</sys:String>
@@ -60,6 +60,6 @@
     <sys:String x:Key="HandwheelIgnoreStop">Игнорирование кнопки остановки в режиме ручного колеса</sys:String>
     <sys:String x:Key="SetOriginFail">Ошибка установки параметров начальной точки</sys:String>
     <sys:String x:Key="StartHomingFail">Ошибка запуска возврата в исходное положение</sys:String>
-
+    <sys:String x:Key="ResetEStop">Сброс EStop</sys:String>
 
 </ResourceDictionary>

@@ -27,7 +27,7 @@ public static class ApiResultHandler
             if (result != 0)
             {
                 MessageBox.Show(info.Message);
-                Logger.Log($"API 返回错误：{info.Message}，代码：{result}");
+                Logger.Log($"API return value error：{info.Message}，code：{result}");
 
             }
             info.AdditionalAction?.Invoke();
@@ -35,8 +35,8 @@ public static class ApiResultHandler
         }
         else
         {
-            MessageBox.Show($"未知错误：{result}");
-            Logger.Log($"未知错误：{result}");
+            MessageBox.Show($"Unknown error：{result}");
+            Logger.Log($"Unknown error：{result}");
         }
     }
 }

@@ -131,6 +131,14 @@ namespace friction_tester
                 });
             };
 
+            _motorController.OnEStopTriggered += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
+                });
+            };
+
         }
 
         private void LoadConfigOnStartup()
@@ -143,22 +151,55 @@ namespace friction_tester
         {
             if (!_isSimulation)
             {
-                if (config.Axes.Count > 0)
+                if (config.Axes != null && config.Axes.Count > 0)
                 {
-                    _motorController._motionCard.GA_SetSoftLimit(_axisNumber, (int)config.Axes[0].SoftLimitMin, (int)config.Axes[0].SoftLimitMax);
-                }
-                if (config.Axes[0].IsHardLimitEnabled)
-                {
-                    _motorController._motionCard.GA_SetHardLimP(_axisNumber, 0, 0, 7); // second 0 is using origin signal as hard limit, 1 is using common IO signal as hard limit; third 0 is using the main card, the fourth is the IO index
+                    try
+                    {
+                        // Apply soft limits (values are already in pulses from configuration)
+                        int result = _motorController._motionCard.GA_SetSoftLimit(_axisNumber,
+                            (int)config.Axes[0].SoftLimitMax,
+                            (int)config.Axes[0].SoftLimitMin);
+
+                        if (result != 0)
+                        {
+                            // Log or handle soft limit setup error
+                            Console.WriteLine($"Failed to set soft limits. Error code: {result}");
+                        }
+
+                        // Apply hard limit settings
+                        if (config.Axes[0].IsHardLimitEnabled)
+                        {
+                            // Enable hard limits
+                            // Using origin signal as hard limit (second parameter = 0)
+                            // Using main card (third parameter = 0)
+                            // IO index 7 (fourth parameter = 7)
+                            result = _motorController._motionCard.GA_SetHardLimP(_axisNumber, 0, 0, 7);
+
+                            if (result != 0)
+                            {
+                                Console.WriteLine($"Failed to enable hard limits. Error code: {result}");
+                            }
+                        }
+                        else
+                        {
+                            // Disable hard limits by setting soft limits to maximum range
+                            // This effectively disables hard limit functionality
+                            result = _motorController._motionCard.GA_SetSoftLimit(_axisNumber, 2147483647, -2147483648);
+
+                            if (result != 0)
+                            {
+                                Console.WriteLine($"Failed to disable hard limits. Error code: {result}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle any exceptions during configuration application
+                        Console.WriteLine($"Error applying configuration: {ex.Message}");
+                        // Optionally log to file or show user notification
+                    }
                 }
             }
-
-
-
-            //if (config.GlobalEStopEnabled)
-            //{
-            //    MotionController.EnableEmergencyStop();
-            //}
             return;
         }
 
@@ -285,29 +326,9 @@ namespace friction_tester
                     _frictionSeries.Points.Clear();
                     FrictionPlotModel.InvalidatePlot(true);
 
-                    await Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await _testController.StartAutomaticTest(speed, acceleration, x1, x2, workpieceName);
-                            while (!_motorController.IsMovementDone())
-                            {
-                                Logger.Log("Waiting for movement to complete...");
-                                await Task.Delay(300); // Poll every 300 ms
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.LogException(ex);
-                            MessageBox.Show("自动模式运行时出错", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                        finally
-                        {
-                            _isTestRunning = false;
-                            StartAutoButtonFriction.Dispatcher.Invoke(() => StartAutoButtonFriction.IsEnabled = true);
-                        }
-                        //Logger.Log("Test completed successfully.");
-                    });
+                    await _testController.StartAutomaticTest(speed, acceleration, x1, x2, workpieceName);
+
+                    Logger.Log($"Test completed. Test name: {workpieceName}");
                 }
                 else
                 {
@@ -326,17 +347,15 @@ namespace friction_tester
             }
 
 
-            // Monitor the test completion
-            await Task.Run(() =>
-            {
-                while ((_motorController.IsMovementDone()) == false)
-                {
-                    Task.Delay(300).Wait(); // Poll every 300 ms
-                }
-            });
-            StartAutoButtonFriction.Dispatcher.Invoke(() => StartAutoButtonFriction.IsEnabled = true);
-
-
+            //// Monitor the test completion
+            //await Task.Run(() =>
+            //{
+            //    while ((_motorController.IsMovementDone()) == false)
+            //    {
+            //        Task.Delay(300).Wait(); // Poll every 300 ms
+            //    }
+            //});
+            //StartAutoButtonFriction.Dispatcher.Invoke(() => StartAutoButtonFriction.IsEnabled = true);
         }
 
         private void OpenDatabaseButton_Click(object sender, RoutedEventArgs e)
@@ -427,27 +446,40 @@ namespace friction_tester
             }
         }
 
+        private void ToggleJoystickMode(bool enabled)
+        {
+            if (enabled)
+            {
+                _motorController.StartJoystickMode(_axisNumber);
+            }
+            else
+            {
+                _motorController.EndJoystickMode(_axisNumber);
+            }
+        }
+
         private void HandWheelButton_Click(object sender, RoutedEventArgs e)
         {
             _isHandwheelOn = !_isHandwheelOn; // Toggle state
 
             if (_isHandwheelOn)
             {
-                ToggleHandWheelMode(true); // Enable Handwheel mode
-                HandwheelButton.Content = LocalizationHelper.GetLocalizedString("HandwheelOpen"); // Update button text
-                Logger.Log("Handwheel mode enabled.");
+                ToggleJoystickMode(true); // Enable Joystick mode
+                HandwheelButton.Content = LocalizationHelper.GetLocalizedString("JoystickOpen"); // Update button text
+                Logger.Log("Joystick mode enabled.");
             }
             else
             {
-                ToggleHandWheelMode(false); // Disable Handwheel mode
-                HandwheelButton.Content = LocalizationHelper.GetLocalizedString("HandwheelClose"); // Update button text
-                Logger.Log("Handwheel mode disabled.");
+                ToggleJoystickMode(false); // Disable Joystick mode
+                HandwheelButton.Content = LocalizationHelper.GetLocalizedString("JoystickClose"); // Update button text
+                Logger.Log("Joystick mode disabled.");
             }
         }
 
         private void ExitHandWheelMode_Click(object sender, RoutedEventArgs e)
         {
-            ToggleHandWheelMode(false);
+            //ToggleHandWheelMode(false);
+            ToggleJoystickMode(false); // Disable Joystick mode
         }
 
 
@@ -552,6 +584,13 @@ namespace friction_tester
                 exporter.ExportToFile(FrictionPlotModel, fullPath);
                 System.Windows.MessageBox.Show($"Plot saved to:\n{fullPath}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private void ResetEstop_Click(object sender, RoutedEventArgs e)
+        {
+            _motorController.ResetEStop();
+            // re-enable jog buttons (or other UI)
+            MessageBox.Show("E-stop cleared. You may now resume motion.", "E-stop Reset", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }

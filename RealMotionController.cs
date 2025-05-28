@@ -18,7 +18,13 @@ namespace friction_tester
         private bool _isMoving = false;
         private readonly short AxisNumber = 1; // Default axis for motion control
         public MultiCardCS.MultiCardCS _motionCard {  get; set; }
-        public bool IsHandwheelMode { get; set; } = false; // Default to automatic mode
+        public bool IsHandwheelMode { get; set; } = false; // Default to automatic 
+        public bool IsJoystickMode { get; set; } = false; // Default to automatic mode
+        private Timer joystickTimer;
+        private short currentAxisNum;
+        private bool isJogging = false;
+        private System.Timers.Timer _estopTimer;
+        public event Action OnEStopTriggered;
         public void Initialize()
         {
             int iRes = 0;
@@ -51,6 +57,7 @@ namespace friction_tester
                 Task.Delay(500); 
                 result = _motionCard.GA_ECatInit();
                 _motionCard.GA_ECatLoadOrgPosAbs(1);
+                Thread.Sleep(5000);
                 _motionCard.GA_AxisOn(AxisNumber);
 
                 if (result != 0)
@@ -60,10 +67,19 @@ namespace friction_tester
                     MessageBox.Show(GetLocalizedString("EtherCATInitFail"), GetLocalizedString("Error"), MessageBoxButton.OK);
                 }
                 else if(result == 1){
-                    Logger.Log("EtherCAT 初始化成功");
+                    Logger.Log("EtherCAT 初始化成功 initialization succeeded");
                 }
 
-                
+                // 1a) Tell the motion card which I/O bit is your E-stop (args: cardNo, port, bitMask, debounce_ms)
+                iRes = _motionCard.GA_EStopSetIO(0, 0, 0, 10);
+                ApiResultHandler.HandleResult(iRes);
+
+                // 1b) Enable E-stop monitoring on the card
+                iRes = _motionCard.GA_EStopOnOff(1);
+                ApiResultHandler.HandleResult(iRes);
+
+                // 1c) Start your E-stop polling loop
+                StartEStopMonitor();
                 //// Scan slaves
                 //short nCount = 100;
                 //string strText;
@@ -89,6 +105,34 @@ namespace friction_tester
                 Logger.LogException(ex);
             }
 
+        }
+        public void StartEStopMonitor()
+        {
+            _estopTimer = new System.Timers.Timer(50);   // poll every 50 ms
+            _estopTimer.Elapsed += (s, e) =>
+            {
+                short status = 1;
+                int r = _motionCard.GA_EStopGetSts(ref status);
+                //ApiResultHandler.HandleResult(r);
+                if (status == 0)
+                {
+                    // hardware E-stop has gone active
+                    _estopTimer.Stop();      // stop further polling until cleared
+                    Stop();                  // your existing emergency‐stop routine :contentReference[oaicite:1]{index=1}
+                    OnEStopTriggered?.Invoke();
+                }
+            };
+            _estopTimer.Start();
+        }
+
+        public void ResetEStop()
+        {
+            // Only call this once the physical E-stop button is released 
+            int iRes = _motionCard.GA_EStopClrSts();
+            Logger.Log($"GA_EStopClrSts() return: {iRes}");
+            //ApiResultHandler.HandleResult(iRes);
+            // restart polling so you can detect the next trip
+            StartEStopMonitor();
         }
 
         public static string GetLocalizedString(string key)
@@ -151,7 +195,7 @@ namespace friction_tester
             _motionCard.GA_ECatSetOrgPosCur(numStation);
         }
 
-        public void MoveToPosition(double position, int maxVelocity, double acceleration)
+        public async Task MoveToPositionAsync(double position, int maxVelocity, double acceleration)
         {   
             if (IsHandwheelMode) 
             {
@@ -168,31 +212,96 @@ namespace friction_tester
                 velStart = 0,
                 smoothTime = 0  // Smooth time to be defined in configuration file
             };
-            //使能轴（通常设置一次即可，不是每次必须）
-            iRes = _motionCard.GA_AxisOn(AxisNumber);
-            //设置为点位模式（通常设置一次即可，不是每次必须）
-            int result = _motionCard.GA_PrfTrap(AxisNumber);
-
-            if (result != 0)
+            try
             {
-                MessageBox.Show("设置点位运动模式失败");
-                throw new Exception("设置指定轴为点位模式失败");
+                //使能轴（通常设置一次即可，不是每次必须）
+                iRes = _motionCard.GA_AxisOn(AxisNumber);
+                Logger.Log($"MoveToPosition: GA_AxisOn returned {iRes}");
+                //设置为点位模式（通常设置一次即可，不是每次必须）
+                int result = _motionCard.GA_PrfTrap(AxisNumber);
+                Logger.Log($"MoveToPosition: GA_PrfTrap returned {result}");
+
+                if (result != 0)
+                {
+                    MessageBox.Show("设置点位运动模式失败");
+                    throw new Exception("设置指定轴为点位模式失败");
+                }
+                result = _motionCard.GA_SetTrapPrm(AxisNumber, ref trapPrm);
+                //Logger.Log($"MoveToPosition: GA_SetTrapPrm returned {result}");
+                if (result != 0)
+                    throw new Exception("梯形运动参数设置出错");
+                result = _motionCard.GA_SetPos(AxisNumber, (int)position);
+                if (result != 0)
+                    throw new Exception("目标位置设置出错");
+                result = _motionCard.GA_SetVel(AxisNumber, (int)maxVelocity);
+                if (result != 0)
+                    throw new Exception("设置最高速度出错");
+                result = _motionCard.GA_Update(1 << (AxisNumber - 1));
+                Logger.Log($"MoveToPosition: GA_Update returned {result}");
+                if (result != 0)
+                    throw new Exception("无法启动点位运动");
+
+                // Small delay to ensure motion has started
+                await Task.Delay(50);
+
+                // Wait for movement to complete
+                while (!IsMovementDone())
+                {
+                    await Task.Delay(10);
+                }
             }
-            result = _motionCard.GA_SetTrapPrm(AxisNumber, ref trapPrm);
-            if (result != 0)
-                throw new Exception("梯形运动参数设置出错");
-            result = _motionCard.GA_SetPos(AxisNumber, (int)position);
-            if (result != 0)
-                throw new Exception("目标位置设置出错");
-            result = _motionCard.GA_SetVel(AxisNumber, (int)maxVelocity);
-            if (result != 0)
-                throw new Exception("设置最高速度出错");
-            result = _motionCard.GA_Update(1 << (AxisNumber - 1));
-            if (result != 0)
-                throw new Exception("无法启动点位运动");
-            
+            finally
+            {
+                _isMoving = false;
+            }
+
+
         }
 
+        public void MoveToPosition(double position, int maxVelocity, double acceleration)
+        {
+            // Deprecated : Use MoveToPositionAsync instead
+            if (IsHandwheelMode)
+            {
+                Logger.Log("Attempted to move while in Handwheel mode: Handwheel mode is active.");
+                return;
+            }
+            short AxisNumber = 1;
+            _isMoving = true;
+            int iRes = 0;
+            var trapPrm = new TTrapPrm
+            {
+                acc = acceleration,
+                dec = acceleration,
+                velStart = 0,
+                smoothTime = 0  // Smooth time to be defined in configuration file
+            };
+            try
+            {
+                //使能轴（通常设置一次即可，不是每次必须）
+                iRes = _motionCard.GA_AxisOn(AxisNumber);
+                //设置为点位模式（通常设置一次即可，不是每次必须）
+                int result = _motionCard.GA_PrfTrap(AxisNumber);
+                if (result != 0)
+                    throw new Exception("设置指定轴为点位模式失败");
+                result = _motionCard.GA_SetTrapPrm(AxisNumber, ref trapPrm);
+                if (result != 0)
+                    throw new Exception("梯形运动参数设置出错");
+                result = _motionCard.GA_SetPos(AxisNumber, (int)position);
+                if (result != 0)
+                    throw new Exception("目标位置设置出错");
+                result = _motionCard.GA_SetVel(AxisNumber, (int)maxVelocity);
+                if (result != 0)
+                    throw new Exception("设置最高速度出错");
+                result = _motionCard.GA_Update(1 << (AxisNumber - 1));
+                if (result != 0)
+                    throw new Exception("无法启动点位运动");
+            }
+            finally
+            {
+                _isMoving = false;
+            }
+        }
         public double GetCurrentPosition()
         {
             // Query the encoder position or planned position
@@ -277,7 +386,6 @@ namespace friction_tester
             switch (color)
             {
                 case "red":
-                    // Example of setting the red light (customize per your hardware)
                     _motionCard.GA_SetExtDoBit(0, 0, 1); // Red light on
                     break;
                 case "yellow":
@@ -407,6 +515,180 @@ namespace friction_tester
                 MessageBox.Show($"读取数据失败，错误码：{iRes}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return iRes;
+        }
+
+        public void StartJoystickMode(short axisNum)
+        {
+            if (!IsJoystickMode)
+            {
+                currentAxisNum = axisNum;
+
+                // Enable axis (set once)
+                int result = _motionCard.GA_AxisOn(axisNum);
+                if (result != 0)
+                {
+                    Logger.Log($"Failed to enable axis: Error {result}");
+                    return;
+                }
+
+                // Set to jog mode (set once)
+                result = _motionCard.GA_PrfJog(axisNum);
+                if (result != 0)
+                {
+                    Logger.Log($"Failed to set jog profile: Error {result}");
+                    return;
+                }
+
+                IsJoystickMode = true;
+
+                // Start monitoring joystick inputs
+                joystickTimer = new Timer(CheckJoystickInput, null, 0, 50); // Check every 50ms
+                Logger.Log($"Joystick mode started for Axis {axisNum}.");
+            }
+        }
+
+        public void EndJoystickMode(short axisNum)
+        {
+            if (IsJoystickMode)
+            {
+                // Stop the timer
+                joystickTimer?.Dispose();
+                joystickTimer = null;
+
+                // Stop any ongoing motion
+                StopJogMotion();
+
+                IsJoystickMode = false;
+                Logger.Log($"Joystick mode ended for Axis {axisNum}.");
+            }
+        }
+
+        private void CheckJoystickInput(object state)
+        {
+            if (!IsJoystickMode) return;
+
+            try
+            {
+                // Read joystick inputs
+                bool jogPositive = GetJoystickInput(1); // X1 positive direction
+                bool jogNegative = GetJoystickInput(2); // X2 negative direction
+
+                if (jogPositive && !jogNegative)
+                {
+                    // Jog positive direction
+                    if (!isJogging)
+                    {
+                        StartJogMotion(true); // true for positive direction
+                    }
+                }
+                else if (jogNegative && !jogPositive)
+                {
+                    // Jog negative direction
+                    if (!isJogging)
+                    {
+                        StartJogMotion(false); // false for negative direction
+                    }
+                }
+                else
+                {
+                    // No input or conflicting inputs - stop motion
+                    if (isJogging)
+                    {
+                        StopJogMotion();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error checking joystick input: {ex.Message}");
+            }
+        }
+
+        private bool GetJoystickInput(int inputIndex)
+        {
+            short pValue = 0;
+            int result = _motionCard.GA_GetExtDiBit(0, (short)inputIndex, ref pValue);
+
+            if (result == 0)
+            {
+                return pValue == 1; // Return true if input is active
+            }
+            else
+            {
+                Logger.Log($"Failed to get joystick input {inputIndex}: Error {result}");
+                return false;
+            }
+        }
+
+        private void StartJogMotion(bool isPositiveDirection)
+        {
+            if (isJogging) return;
+
+            try
+            {
+                // Set jog parameters
+                MultiCardCS.MultiCardCS.TJogPrm jogPrm;
+                jogPrm.dAcc = 1;    // Acceleration: pulse/millisecond/millisecond
+                jogPrm.dDec = 1;    // Deceleration: pulse/millisecond/millisecond
+                jogPrm.dSmooth = 0; // Smoothing time (set to 0)
+
+                // Set motion parameters
+                int result = _motionCard.GA_SetJogPrm(currentAxisNum, ref jogPrm);
+                if (result != 0)
+                {
+                    Logger.Log($"Failed to set jog parameters: Error {result}");
+                    return;
+                }
+
+                // Set speed (positive for forward, negative for reverse)
+                double speed = isPositiveDirection ? 20 : -20;
+                result = _motionCard.GA_SetVel(currentAxisNum, speed);
+                if (result != 0)
+                {
+                    Logger.Log($"Failed to set jog speed: Error {result}");
+                    return;
+                }
+
+                // Start motion
+                result = _motionCard.GA_Update((int)(0x0001 << (currentAxisNum - 1)));
+                if (result == 0)
+                {
+                    isJogging = true;
+                    Logger.Log($"Jog motion started in {(isPositiveDirection ? "positive" : "negative")} direction");
+                }
+                else
+                {
+                    Logger.Log($"Failed to start jog motion: Error {result}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Exception in StartJogMotion: {ex.Message}");
+            }
+        }
+
+        private void StopJogMotion()
+        {
+            if (!isJogging) return;
+
+            try
+            {
+                // Stop the axis
+                int result = _motionCard.GA_Stop((int)(0x0001 << (currentAxisNum - 1)), 0);
+                if (result == 0)
+                {
+                    isJogging = false;
+                    Logger.Log("Jog motion stopped");
+                }
+                else
+                {
+                    Logger.Log($"Failed to stop jog motion: Error {result}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Exception in StopJogMotion: {ex.Message}");
+            }
         }
     }
 
