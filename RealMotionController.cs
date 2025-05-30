@@ -71,15 +71,15 @@ namespace friction_tester
                 }
 
                 // 1a) Tell the motion card which I/O bit is your E-stop (args: cardNo, port, bitMask, debounce_ms)
-                //iRes = _motionCard.GA_EStopSetIO(0, 0, 0, 10);
-                //ApiResultHandler.HandleResult(iRes);
+                iRes = _motionCard.GA_EStopSetIO(0, 0, 1, 20);      // (short nCardIndex,short nIOIndex,short nEStopSns = 1 (reversed logic for NC switch),unsigned long lFilterTime)
+                ApiResultHandler.HandleResult(iRes);
 
                 // 1b) Enable E-stop monitoring on the card
-                //iRes = _motionCard.GA_EStopOnOff(1);
-                //ApiResultHandler.HandleResult(iRes);
+                iRes = _motionCard.GA_EStopOnOff(1);
+                ApiResultHandler.HandleResult(iRes);
 
                 // 1c) Start your E-stop polling loop
-                //StartEStopMonitor();
+                StartEStopMonitor();
             }
             catch (Exception ex)
             {
@@ -98,11 +98,11 @@ namespace friction_tester
                 Logger.Log($"[EStop Poll] GA_EStopGetSts returned code={code}, latched={latched}");
 
                 // 2) (optional) also read the **raw** input bit so you can see the NC switch
-                short raw = 0;
-                int rc2 = _motionCard.GA_GetExtDiBit(0, 0, ref raw);  // card=0, port=0, bit=0
-                Logger.Log($"[EStop Poll] GA_GetExtDiBit returned code={rc2}, rawIn={raw}");
+                //short raw = 0;
+                //int rc2 = _motionCard.GA_GetExtDiBit(0, 0, ref raw);  // card=0, port=0, bit=0
+                //Logger.Log($"[EStop Poll] GA_GetExtDiBit returned code={rc2}, rawIn={raw}");
                 //ApiResultHandler.HandleResult(r);
-                if (raw == 0)
+                if (latched == 1)
                 {
                     // hardware E-stop has gone active
                     _estopTimer.Stop();      // stop further polling until cleared

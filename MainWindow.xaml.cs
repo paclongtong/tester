@@ -132,13 +132,13 @@ namespace friction_tester
                 });
             };
 
-            //_motorController.OnEStopTriggered += () =>
-            //{
-            //    Dispatcher.Invoke(() =>
-            //    {
-            //        MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
-            //    });
-            //};
+            _motorController.OnEStopTriggered += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
+                });
+            };
 
         }
 

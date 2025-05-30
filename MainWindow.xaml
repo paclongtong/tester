@@ -71,6 +71,7 @@
                     <TextBox x:Name="GuideModelInput"
                  Text="test35"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -82,6 +83,7 @@
                     <TextBox x:Name="PreloadInput"
                  Text="test2"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -93,6 +95,7 @@
                     <TextBox x:Name="SealLubricationInput"
                  Text="test3"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -104,6 +107,7 @@
                     <TextBox x:Name="SpeedInputFriction"
                  Text="50"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -115,6 +119,7 @@
                     <TextBox x:Name="AccelerationInputFriction"
                  Text="1"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -126,6 +131,7 @@
                     <TextBox x:Name="StartPositionInput"
                  Text="0"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -137,6 +143,7 @@
                     <TextBox x:Name="EndPositionInput"
                  Text="200"
                  FontSize="16" Height="30"
+                    VerticalContentAlignment="Center"
                  Margin="0,5,0,10"
                  TextChanged="EndPositionInput_TextChanged"/>
                 </StackPanel>
