@@ -71,34 +71,15 @@ namespace friction_tester
                 }
 
                 // 1a) Tell the motion card which I/O bit is your E-stop (args: cardNo, port, bitMask, debounce_ms)
-                iRes = _motionCard.GA_EStopSetIO(0, 0, 0, 10);
-                ApiResultHandler.HandleResult(iRes);
+                //iRes = _motionCard.GA_EStopSetIO(0, 0, 0, 10);
+                //ApiResultHandler.HandleResult(iRes);
 
                 // 1b) Enable E-stop monitoring on the card
-                iRes = _motionCard.GA_EStopOnOff(1);
-                ApiResultHandler.HandleResult(iRes);
+                //iRes = _motionCard.GA_EStopOnOff(1);
+                //ApiResultHandler.HandleResult(iRes);
 
                 // 1c) Start your E-stop polling loop
-                StartEStopMonitor();
-                //// Scan slaves
-                //short nCount = 100;
-                //string strText;
-
-                //Task.Delay(500);
-                //_motionCard.GA_ECatGetSlaveCount(ref nCount);
-
-                //strText = string.Format("扫描到{0:G}个从站", nCount);
-                //MessageBox.Show(strText);
-
-                //short pCutInitSlaveNum = 0;
-                //short pMode = 0; ;
-                //short pModeStep = 0;
-                ////string strText;
-
-                //_motionCard.GA_ECatGetInitStep(ref pCutInitSlaveNum, ref pMode, ref pModeStep);
-
-                //strText = string.Format("正在初始化第{0:G}个站点,当前模式{0:G}，子步{0:G}", pCutInitSlaveNum, pMode, pModeStep);
-                //MessageBox.Show(strText);
+                //StartEStopMonitor();
             }
             catch (Exception ex)
             {
@@ -111,10 +92,17 @@ namespace friction_tester
             _estopTimer = new System.Timers.Timer(50);   // poll every 50 ms
             _estopTimer.Elapsed += (s, e) =>
             {
-                short status = 1;
-                int r = _motionCard.GA_EStopGetSts(ref status);
+                // 1) Query the latched E-stop status
+                short latched = 0;
+                int code = _motionCard.GA_EStopGetSts(ref latched);
+                Logger.Log($"[EStop Poll] GA_EStopGetSts returned code={code}, latched={latched}");
+
+                // 2) (optional) also read the **raw** input bit so you can see the NC switch
+                short raw = 0;
+                int rc2 = _motionCard.GA_GetExtDiBit(0, 0, ref raw);  // card=0, port=0, bit=0
+                Logger.Log($"[EStop Poll] GA_GetExtDiBit returned code={rc2}, rawIn={raw}");
                 //ApiResultHandler.HandleResult(r);
-                if (status == 0)
+                if (raw == 0)
                 {
                     // hardware E-stop has gone active
                     _estopTimer.Stop();      // stop further polling until cleared
@@ -197,9 +185,9 @@ namespace friction_tester
 
         public async Task MoveToPositionAsync(double position, int maxVelocity, double acceleration)
         {   
-            if (IsHandwheelMode) 
+            if (IsHandwheelMode || IsJoystickMode) 
             {
-                Logger.Log("Attempted to move while in Handwheel mode: Handwheel mode is active.");
+                Logger.Log("Attempted to move while in Handwheel mode: Manual mode is active.");
                 return;
             }
             short AxisNumber = 1;
@@ -376,7 +364,7 @@ namespace friction_tester
                 Logger.Log("常规紧急停止功能触发");
             }
             
-            if (result != 0) throw new Exception("Failed to stop motion.");
+            //if (result != 0) throw new Exception("Failed to stop motion.");
             _isMoving = false;
         }
 

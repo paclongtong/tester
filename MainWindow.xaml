@@ -231,7 +231,7 @@
                 HorizontalAlignment="Center"
                 Margin="0,10,0,0">
                     <Button x:Name="HandwheelButton"
-                Content="{DynamicResource HandwheelClose}"
+                Content="{DynamicResource JoystickOff}"
                 Width="150" Height="40"
                 Margin="10,0,0,0"
                 Click="HandWheelButton_Click"/>

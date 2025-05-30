@@ -120,6 +120,9 @@
   <data name="HardLimitEnable" xml:space="preserve">
     <value>Hard Limit Enable</value>
   </data>
+  <data name="JoystickOpen" xml:space="preserve">
+    <value>Joystick: Open</value>
+  </data>
   <data name="LanguageSelect" xml:space="preserve">
     <value>Language Select</value>
   </data>

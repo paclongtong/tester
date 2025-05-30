@@ -35,6 +35,7 @@ namespace friction_tester
         private SettingWindow _settingWindow;
         short _axisNumber = 1;
         private bool _isHandwheelOn = false; // Track the state of Handwheel mode
+        private bool _isJoystickOn = false; // Track the state of Joystick mode
 
         private bool _isSimulation = false; // Set to true if Motion Control Card is missing
 
@@ -131,13 +132,13 @@ namespace friction_tester
                 });
             };
 
-            _motorController.OnEStopTriggered += () =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
-                });
-            };
+            //_motorController.OnEStopTriggered += () =>
+            //{
+            //    Dispatcher.Invoke(() =>
+            //    {
+            //        MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
+            //    });
+            //};
 
         }
 
@@ -460,18 +461,18 @@ namespace friction_tester
 
         private void HandWheelButton_Click(object sender, RoutedEventArgs e)
         {
-            _isHandwheelOn = !_isHandwheelOn; // Toggle state
+            _isJoystickOn = !_isJoystickOn; // Toggle state
 
-            if (_isHandwheelOn)
+            if (_isJoystickOn)
             {
                 ToggleJoystickMode(true); // Enable Joystick mode
-                HandwheelButton.Content = LocalizationHelper.GetLocalizedString("JoystickOpen"); // Update button text
+                HandwheelButton.Content = LocalizationHelper.GetLocalizedString("JoystickOn"); // Update button text
                 Logger.Log("Joystick mode enabled.");
             }
             else
             {
                 ToggleJoystickMode(false); // Disable Joystick mode
-                HandwheelButton.Content = LocalizationHelper.GetLocalizedString("JoystickClose"); // Update button text
+                HandwheelButton.Content = LocalizationHelper.GetLocalizedString("JoystickOff"); // Update button text
                 Logger.Log("Joystick mode disabled.");
             }
         }
@@ -483,7 +484,7 @@ namespace friction_tester
         }
 
 
-        private void JogP_Click(object sender, RoutedEventArgs e)
+        private void JogP_MouseDown(object sender, RoutedEventArgs e)
         {
             _motorController.HandleExternalInput(1);
             short nAxisNum = 1;
@@ -513,7 +514,14 @@ namespace friction_tester
             iRes = _motorController._motionCard.GA_Update(0X0001 << (nAxisNum - 1));
         }
 
-        private void JogN_Click(object sender, RoutedEventArgs e)
+        private void JogP_MouseUp(object sender, RoutedEventArgs e)
+        {
+            _motorController.HandleExternalInput(2);
+            //停止运动
+            _motorController._motionCard.GA_Stop(0XFFFFF, 0XFFFFF);
+        }
+
+        private void JogN_MouseDown(object sender, RoutedEventArgs e)
         {
             _motorController.HandleExternalInput(1);
             short nAxisNum = 1;
@@ -543,9 +551,17 @@ namespace friction_tester
             iRes = _motorController._motionCard.GA_Update(0X0001 << (nAxisNum - 1));
         }
 
+        private void JogN_MouseUp(object sender, RoutedEventArgs e)
+        {
+            _motorController.HandleExternalInput(2);
+            //停止运动
+            _motorController._motionCard.GA_Stop(0XFFFFF, 0XFFFFF);
+        }
+
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             _motorController.SetOrigin(_axisNumber);
+            MessageBox.Show(LocalizationHelper.GetLocalizedString("SetOrigin"), "Info", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void EndPositionInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -591,6 +607,16 @@ namespace friction_tester
             _motorController.ResetEStop();
             // re-enable jog buttons (or other UI)
             MessageBox.Show("E-stop cleared. You may now resume motion.", "E-stop Reset", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void JogP_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void JogN_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -254,7 +254,17 @@ namespace friction_tester
                     if (BitConverter.IsLittleEndian)
                         Array.Reverse(valueBytes);
 
-                    return BitConverter.ToSingle(valueBytes, 0);
+                    // 1) turn the 4 bytes into a raw int (e.g. 3619)
+                    int rawCounts = BitConverter.ToInt32(valueBytes, 0);
+
+                    // 2) shift the decimal two places (e.g. 3619 → 36.19 kg)
+                    float weightKg = rawCounts / 100f;
+
+                    // 3) convert kg → N (use 9.80665 m/s² if you want more precision)
+                    const float KgToNewton = 9.81f;
+                    float forceNewton = weightKg * KgToNewton;
+
+                    return forceNewton;
                 }
 
                 throw new Exception("Invalid response from DY500");

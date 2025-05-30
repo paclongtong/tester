@@ -63,5 +63,9 @@
     <sys:String x:Key="StartHomingFail">Failed to start homing</sys:String>
 
     <sys:String x:Key="ResetEStop">Reset E-Stop</sys:String>
+    <sys:String x:Key="JoystickOn">Joystick: On</sys:String>
+    <sys:String x:Key="JoystickOff">Joystick: Off</sys:String>
+    <sys:String x:Key="SetOrigin">Origin redefined, restart the application</sys:String>
+
 
 </ResourceDictionary>

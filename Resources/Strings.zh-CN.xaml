@@ -62,6 +62,10 @@
     <sys:String x:Key="StartTest">开始测试</sys:String>
     <sys:String x:Key="ResetEStop">重置急停状态</sys:String>
 
+    <sys:String x:Key="JoystickOn">操纵杆：打开</sys:String>
+    <sys:String x:Key="JoystickOff">操纵杆：关闭</sys:String>
+    <sys:String x:Key="SetOrigin">原点已重新定义，重启程序生效</sys:String>
+
 
 
 </ResourceDictionary>

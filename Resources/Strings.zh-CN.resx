@@ -120,6 +120,9 @@
   <data name="HardLimitEnable" xml:space="preserve">
     <value>硬限位使能1</value>
   </data>
+  <data name="JoystickOpen" xml:space="preserve">
+    <value>操纵杆：开启</value>
+  </data>
   <data name="LanguageSelect" xml:space="preserve">
     <value>语言选择2</value>
   </data>

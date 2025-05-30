@@ -62,5 +62,9 @@
     <sys:String x:Key="SetOriginFail">Échec de la définition des paramètres d'origine</sys:String>
     <sys:String x:Key="StartHomingFail">Échec du démarrage du retour à l'origine</sys:String>
     <sys:String x:Key="ResetEStop">Réinitialiser l'arrêt d'urgence</sys:String>
-    
+
+    <sys:String x:Key="JoystickOn">Joystick : activé</sys:String>
+    <sys:String x:Key="JoystickOff">Joystick : désactivé</sys:String>
+    <sys:String x:Key="SetOrigin">Origine redéfinie, redémarrez l'application</sys:String>
+
 </ResourceDictionary>

@@ -70,6 +70,15 @@ namespace friction_tester.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to JoystickOpen.
+        /// </summary>
+        public static string JoystickOpen {
+            get {
+                return ResourceManager.GetString("JoystickOpen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Language Select.
         /// </summary>
         public static string LanguageSelect {

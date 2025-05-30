@@ -9,6 +9,7 @@ using System.Windows.Input;
 using OxyPlot;
 using OxyPlot.Series;
 using CommunityToolkit.Mvvm.Input;
+using OxyPlot.Axes;
 
 namespace friction_tester
 {
@@ -88,9 +89,9 @@ namespace friction_tester
 
             var lineSeries = new LineSeries
             {
-                Title = LocalizationHelper.GetLocalizedString("Friction"),
+                Title = LocalizationHelper.GetLocalizedString("Friction") + "(N)",
                 MarkerType = MarkerType.Circle,
-                TrackerFormatString = "X: {2:0.00}, Y: {4:0.00}" // Enable tooltips
+                TrackerFormatString = "Position: {2:0.00} mm, Friction: {4:0.00} N" // Enable tooltips
             };
             FrictionPlotModel.Series.Add(lineSeries);
         }
@@ -177,6 +178,7 @@ namespace friction_tester
         // Buffer for temporarily storing sensor data points.
         private readonly List<DataPoint> _bufferedPoints = new();
         private System.Timers.Timer _updateTimer;
+        private readonly object _lockObject = new object(); // Better lock object
 
         public SpeedTestViewModel()
         {
@@ -189,11 +191,24 @@ namespace friction_tester
         private void InitializePlot()
         {
             FrictionPlotModel = new PlotModel { Title = LocalizationHelper.GetLocalizedString("FrictionDisplacementChart") };
+            // Add X-axis
+            FrictionPlotModel.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Title = LocalizationHelper.GetLocalizedString("Position") + " (mm)"
+            });
+
+            // Add Y-axis
+            FrictionPlotModel.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Title = LocalizationHelper.GetLocalizedString("Friction") + " (N)"
+            });
             var lineSeries = new LineSeries
             {
                 Title = LocalizationHelper.GetLocalizedString("Friction"),
                 MarkerType = MarkerType.Circle,
-                TrackerFormatString = "X: {2:0.00}, Y: {4:0.00}"
+                TrackerFormatString = "Position: {2:0.00} mm, Friction: {4:0.00} N"
             };
             FrictionPlotModel.Series.Add(lineSeries);
         }
@@ -206,37 +221,81 @@ namespace friction_tester
             }
         }
 
+        public void ClearData()
+        {
+            lock (_lockObject)
+            {
+                _bufferedPoints.Clear();
+            }
+
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                if (FrictionPlotModel.Series.FirstOrDefault() is LineSeries lineSeries)
+                {
+                    lineSeries.Points.Clear();
+                    FrictionPlotModel.InvalidatePlot(true);
+                }
+            });
+        }
+
         private void UpdateGraph()
         {
-            lock (_bufferedPoints)
+            List<DataPoint> pointsToAdd;
+
+            lock (_lockObject)
             {
                 if (_bufferedPoints.Count == 0) return;
+                pointsToAdd = new List<DataPoint>(_bufferedPoints);
+                _bufferedPoints.Clear();
+            }
 
-                // Ensure the update happens on the UI thread.
-                App.Current.Dispatcher.Invoke(() =>
+            // Ensure the update happens on the UI thread
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                if (FrictionPlotModel.Series.FirstOrDefault() is LineSeries lineSeries)
                 {
-                    if (FrictionPlotModel.Series.FirstOrDefault() is LineSeries lineSeries)
-                    {
-                        lineSeries.Points.AddRange(_bufferedPoints);
+                    lineSeries.Points.AddRange(pointsToAdd);
 
-                        // Adjust Y-axis dynamically
+                    // Adjust axes dynamically if there are points
+                    if (lineSeries.Points.Count > 0)
+                    {
+                        // Adjust Y-axis
                         double yMin = lineSeries.Points.Min(p => p.Y);
                         double yMax = lineSeries.Points.Max(p => p.Y);
-                        double margin = Math.Max((yMax - yMin) * 0.2, 0.1);
+                        double yMargin = Math.Max((yMax - yMin) * 0.1, 0.1);
+
                         if (FrictionPlotModel.Axes.Count >= 2)
                         {
-                            FrictionPlotModel.Axes[1].Minimum = yMin - margin;
-                            FrictionPlotModel.Axes[1].Maximum = yMax + margin;
+                            FrictionPlotModel.Axes[1].Minimum = yMin - yMargin;
+                            FrictionPlotModel.Axes[1].Maximum = yMax + yMargin;
                         }
-                        _bufferedPoints.Clear();
-                        FrictionPlotModel.InvalidatePlot(true);
+
+                        // Adjust X-axis
+                        double xMin = lineSeries.Points.Min(p => p.X);
+                        double xMax = lineSeries.Points.Max(p => p.X);
+                        double xMargin = Math.Max((xMax - xMin) * 0.05, 1.0);
+
+                        if (FrictionPlotModel.Axes.Count >= 1)
+                        {
+                            FrictionPlotModel.Axes[0].Minimum = xMin - xMargin;
+                            FrictionPlotModel.Axes[0].Maximum = xMax + xMargin;
+                        }
                     }
-                });
-            }
+
+                    FrictionPlotModel.InvalidatePlot(true);
+                }
+            });
         }
 
         protected void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        // Dispose of timer when view model is disposed
+        public void Dispose()
+        {
+            _updateTimer?.Stop();
+            _updateTimer?.Dispose();
+        }
     }
 }
 

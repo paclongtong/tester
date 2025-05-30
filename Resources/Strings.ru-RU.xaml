@@ -62,4 +62,8 @@
     <sys:String x:Key="StartHomingFail">Ошибка запуска возврата в исходное положение</sys:String>
     <sys:String x:Key="ResetEStop">Сброс EStop</sys:String>
 
+    <sys:String x:Key="JoystickOn">Джойстик: Вкл.</sys:String>
+    <sys:String x:Key="JoystickOff">Джойстик: Выкл.</sys:String>
+    <sys:String x:Key="SetOrigin">Переопределен источник, перезапустите приложение</sys:String>
+
 </ResourceDictionary>
