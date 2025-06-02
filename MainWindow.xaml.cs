@@ -55,7 +55,7 @@ namespace friction_tester
                     MessageBox.Show("Guide Model can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                _guideModel = cleanedValue.ToUpper(); // Convert to uppercase
+                _guideModel = cleanedValue; // Convert to uppercase
             }
         }
 
@@ -70,7 +70,7 @@ namespace friction_tester
                     MessageBox.Show("Preload can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                _preload = cleanedValue.ToUpper(); // Convert to uppercase
+                _preload = cleanedValue; // Convert to uppercase
             }
         }
 
@@ -85,7 +85,7 @@ namespace friction_tester
                     MessageBox.Show("Seal Lubrication can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                _sealLubrication = cleanedValue.ToUpper(); // Convert to uppercase
+                _sealLubrication = cleanedValue; // Convert to uppercase
             }
         }
 
@@ -95,7 +95,6 @@ namespace friction_tester
             InitializePlot();
 
             _isHandwheelOn = true;
-            //HandwheelButton.Content = "手轮模式：关";
 
             //AppConfig config = ConfigManager.LoadConfig(); // Load settings on startup
             LanguageManager.ChangeLanguage(ConfigManager.Config.SelectedLanguage);
@@ -158,8 +157,8 @@ namespace friction_tester
                     {
                         // Apply soft limits (values are already in pulses from configuration)
                         int result = _motorController._motionCard.GA_SetSoftLimit(_axisNumber,
-                            (int)config.Axes[0].SoftLimitMax,
-                            (int)config.Axes[0].SoftLimitMin);
+                            (int)(config.Axes[0].SoftLimitMax * 1000),
+                            (int)(config.Axes[0].SoftLimitMin * 1000));
 
                         if (result != 0)
                         {
@@ -232,7 +231,7 @@ namespace friction_tester
 
         private void FrictionTestButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("此为当前界面", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            //MessageBox.Show("此为当前界面", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
 
@@ -291,7 +290,8 @@ namespace friction_tester
             catch (Exception ex)
             {
                 Logger.LogException(ex);
-                MessageBox.Show($"回零过程中出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                string HomingMessage = LocalizationHelper.GetLocalizedString("HomingError");
+                MessageBox.Show($"{HomingMessage}{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -333,7 +333,8 @@ namespace friction_tester
                 }
                 else
                 {
-                    MessageBox.Show("请输入有效的参数！", "输入错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    string message = LocalizationHelper.GetLocalizedString("InvalidParametersMessage");
+                    MessageBox.Show($"{message}", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
@@ -617,6 +618,19 @@ namespace friction_tester
         private void JogN_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private async void SensorClear_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await _testController._dataAcquisition.ClearCurrentWeightAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+                MessageBox.Show($"Error when clearing sensor data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

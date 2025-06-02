@@ -61,6 +61,7 @@
                     <RowDefinition Height="*" MinHeight="40"/>
                     <RowDefinition Height="Auto"/>
                     <!-- row 9: reset estop -->
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- 0: Guide Model -->
@@ -117,7 +118,7 @@
                    FontWeight="Bold" FontSize="16"
                    Margin="0,5,0,0"/>
                     <TextBox x:Name="AccelerationInputFriction"
-                 Text="1"
+                 Text="1000"
                  FontSize="16" Height="30"
                              VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
@@ -191,6 +192,15 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="9"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" Margin="0,0,0,20">
+                    <Button x:Name="SensorReset" Width="170"
+                Content="{DynamicResource SensorReset}"
+                Click="SensorClear_Click"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Row="10"
                 Orientation="Horizontal"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">

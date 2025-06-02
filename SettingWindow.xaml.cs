@@ -91,8 +91,10 @@ namespace friction_tester
             try
             {
                 // The config already stores values in mm (as doubles), so display directly
-                SoftLimitMinTextBox.Text = _config.Axes[0].SoftLimitMin.ToString("F3"); // 3 decimal places
-                SoftLimitMaxTextBox.Text = _config.Axes[0].SoftLimitMax.ToString("F3"); // 3 decimal places
+                //SoftLimitMinTextBox.Text = _config.Axes[0].SoftLimitMin.ToString("F3"); // 3 decimal places
+                //MessageBox.Show($"SoftLimitMax: {_config.Axes[0].SoftLimitMax} mm", "Debug Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                //SoftLimitMaxTextBox.Text = _config.Axes[0].SoftLimitMax.ToString("F3"); // 3 decimal places
+                this.DataContext = _config.Axes[0]; // Bind the first axis configuration to the DataContext
                 IsHardLimitEnabledCheckBox.IsChecked = _config.Axes[0].IsHardLimitEnabled;
             }
             catch (Exception ex)
@@ -100,9 +102,14 @@ namespace friction_tester
                 MessageBox.Show($"Error loading settings: {ex.Message}. Using default values.",
                                 "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-                // Set default values in case of error
-                SoftLimitMinTextBox.Text = "0.000";
-                SoftLimitMaxTextBox.Text = "100.000";
+                // Create a default axis config and set as DataContext
+                var defaultAxis = new AxisConfig
+                {
+                    SoftLimitMin = 0.000,
+                    SoftLimitMax = 1500.000,
+                    IsHardLimitEnabled = false
+                };
+                this.DataContext = defaultAxis;
                 IsHardLimitEnabledCheckBox.IsChecked = false;
             }
         }
@@ -162,8 +169,10 @@ namespace friction_tester
                 bool isHardLimitEnabled = IsHardLimitEnabledCheckBox.IsChecked ?? false;
 
                 // Save to configuration (values will be applied on next startup)
-                _config.Axes[0].SoftLimitMin = (int)softLimitMinPulses;
-                _config.Axes[0].SoftLimitMax = (int)softLimitMaxPulses;
+                //_config.Axes[0].SoftLimitMin = (int)softLimitMinPulses;
+                //_config.Axes[0].SoftLimitMax = (int)softLimitMaxPulses;
+                _config.Axes[0].SoftLimitMin = softLimitMinMm;
+                _config.Axes[0].SoftLimitMax = softLimitMaxMm;
                 _config.Axes[0].IsHardLimitEnabled = isHardLimitEnabled;
 
                 // Save configuration to file
@@ -177,7 +186,7 @@ namespace friction_tester
                 MessageBox.Show($"Error saving settings: {ex.Message}",
                                 "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            ClearAllTextBoxes(); // Clear all text boxes after saving
+            //ClearAllTextBoxes(); // Clear all text boxes after saving
         }
         private void ClearAllTextBoxes()
         {

@@ -19,9 +19,9 @@
     <sys:String x:Key="Acceleration">Ускорение (мм/с²)</sys:String>
     <sys:String x:Key="Start">Начало (мм)</sys:String>
     <sys:String x:Key="End">Конец (мм)</sys:String>
-    <sys:String x:Key="StartAutoTest">Запуск автоматического теста</sys:String>
+    <sys:String x:Key="StartAutoTest">Начать тест</sys:String>
     <sys:String x:Key="Stop">Остановить</sys:String>
-    <sys:String x:Key="ResetOrigin">Сброс и возврат на начальную точку</sys:String>
+    <sys:String x:Key="ResetOrigin">Сброс и домой</sys:String>
     <sys:String x:Key="JogP">Джог +</sys:String>
     <sys:String x:Key="JogN">Джог -</sys:String>
     <sys:String x:Key="HandwheelOpen">Ручное колесо: Включено</sys:String>
@@ -40,7 +40,7 @@
     <sys:String x:Key="Friction">Трение</sys:String>
     <sys:String x:Key="TestDuration">Продолжительность теста</sys:String>
     <sys:String x:Key="PrintResult">Распечатать результат</sys:String>
-    <sys:String x:Key="Repetition">Повторения</sys:String>
+    <sys:String x:Key="Repetitions">Повторения</sys:String>
     <sys:String x:Key="StartTest">Начать тестирование</sys:String>
     <sys:String x:Key="DeleteSelected">Удалить выбранное</sys:String>
     <sys:String x:Key="DisplayResult">Отобразить результат</sys:String>
@@ -65,5 +65,10 @@
     <sys:String x:Key="JoystickOn">Джойстик: Вкл.</sys:String>
     <sys:String x:Key="JoystickOff">Джойстик: Выкл.</sys:String>
     <sys:String x:Key="SetOrigin">Переопределен источник, перезапустите приложение</sys:String>
+    <sys:String x:Key="SensorReset">Сбросить значение датчика</sys:String>
+    <sys:String x:Key="HomingErrorMessage">Произошла ошибка во время возврата в исходное положение: </sys:String>
+    <sys:String x:Key="InvalidParametersMessage">Пожалуйста, введите допустимые параметры!</sys:String>
+    <sys:String x:Key="EnableMotionCardSuccess">Карта управления движением включена.</sys:String>
+    <sys:String x:Key="EnableMotionCardFailure">Не удалось включить карту управления движением.</sys:String>
 
 </ResourceDictionary>

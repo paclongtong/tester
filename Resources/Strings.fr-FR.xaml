@@ -21,7 +21,7 @@
     <sys:String x:Key="End">Fin (mm)</sys:String>
     <sys:String x:Key="StartAutoTest">Démarrer le test automatique</sys:String>
     <sys:String x:Key="Stop">Arrêter</sys:String>
-    <sys:String x:Key="ResetOrigin">Réinitialiser et revenir à l'origine</sys:String>
+    <sys:String x:Key="ResetOrigin">Réinit. et Origine</sys:String>
     <sys:String x:Key="JogP">Jog +</sys:String>
     <sys:String x:Key="JogN">Jog -</sys:String>
     <sys:String x:Key="HandwheelOpen">Volant manuel: Ouvert</sys:String>
@@ -66,5 +66,11 @@
     <sys:String x:Key="JoystickOn">Joystick : activé</sys:String>
     <sys:String x:Key="JoystickOff">Joystick : désactivé</sys:String>
     <sys:String x:Key="SetOrigin">Origine redéfinie, redémarrez l'application</sys:String>
+    <sys:String x:Key="SensorReset">Réinitialiser le capteur</sys:String>
+    <sys:String x:Key="HomingErrorMessage">Une erreur s'est produite lors du retour à la maison :</sys:String>
+    <sys:String x:Key="InvalidParametersMessage">Veuillez entrer des paramètres valides !</sys:String>
+    <sys:String x:Key="EnableMotionCardSuccess">Carte de contrôle de mouvement activée.</sys:String>
+    <sys:String x:Key="EnableMotionCardFailure">Échec de l'activation de la carte de contrôle de mouvement.</sys:String>
+
 
 </ResourceDictionary>

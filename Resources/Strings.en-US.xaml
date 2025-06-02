@@ -17,7 +17,7 @@
     <sys:String x:Key="End">End (mm)</sys:String>
     <sys:String x:Key="StartAutoTest">Start Automatic Test</sys:String>
     <sys:String x:Key="Stop">Stop</sys:String>
-    <sys:String x:Key="ResetOrigin">Reset and Back to Origin</sys:String>
+    <sys:String x:Key="ResetOrigin">Reset &amp; Home</sys:String>
     <sys:String x:Key="JogP">Jog P</sys:String>
     <sys:String x:Key="JogN">Jog N</sys:String>
     <sys:String x:Key="HandwheelOpen">Handwheel: Open</sys:String>
@@ -66,6 +66,14 @@
     <sys:String x:Key="JoystickOn">Joystick: On</sys:String>
     <sys:String x:Key="JoystickOff">Joystick: Off</sys:String>
     <sys:String x:Key="SetOrigin">Origin redefined, restart the application</sys:String>
+    <sys:String x:Key="SensorReset">Sensor Reset</sys:String>
+    <sys:String x:Key="HomingErrorMessage">Error occurred during homing: </sys:String>
+    <sys:String x:Key="InvalidParametersMessage">Please enter valid parameters!</sys:String>
+    <sys:String x:Key="EnableMotionCardSuccess">Motion control card enabled.</sys:String>
+    <sys:String x:Key="EnableMotionCardFailure">Failed to enable the motion control card.</sys:String>
+
+
+
 
 
 </ResourceDictionary>

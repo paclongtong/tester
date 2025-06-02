@@ -15,7 +15,7 @@ namespace friction_tester
         public event Action<SensorData> OnDataCollected;
 
         internal IMotionController _motorController;
-        private DataAcquisition _dataAcquisition;
+        public DataAcquisition _dataAcquisition;
         private CancellationTokenSource _cancellationTokenSource;
 
         private readonly TestResultsRepository _repository;
@@ -104,13 +104,7 @@ namespace friction_tester
                 double speed = ConfigManager.Config.Axes[0].HomeReturnSpeed;
                 double acceleration = 20;
                 _motorController.HandleExternalInput(1);
-                _motorController.MoveToPosition(0, (int)speed, acceleration);
-                //_motorController.HomeAxis(); // HomeAxis() needs a origin sensor to function, otherwise, use usual movement function to realize homing
-                while (_motorController.IsMovementDone())
-                {
-                    await Task.Delay(50, _cancellationTokenSource.Token);
-                }
-
+                await _motorController.MoveToPositionAsync(0, (int)speed, acceleration);
                 _motorController.HandleExternalInput(2);
             }, _cancellationTokenSource.Token);
         }

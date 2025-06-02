@@ -65,6 +65,11 @@
     <sys:String x:Key="JoystickOn">操纵杆：打开</sys:String>
     <sys:String x:Key="JoystickOff">操纵杆：关闭</sys:String>
     <sys:String x:Key="SetOrigin">原点已重新定义，重启程序生效</sys:String>
+    <sys:String x:Key="SensorReset">传感器清零</sys:String>
+    <sys:String x:Key="HomingErrorMessage">回零过程中出错：</sys:String>
+    <sys:String x:Key="InvalidParametersMessage">请输入有效的参数！</sys:String>
+    <sys:String x:Key="EnableMotionCardSuccess">打开运动控制卡成功！</sys:String>
+    <sys:String x:Key="EnableMotionCardFailure">打开运动控制卡失败！</sys:String>
 
 
 
