@@ -71,6 +71,8 @@
     <sys:String x:Key="InvalidParametersMessage">Please enter valid parameters!</sys:String>
     <sys:String x:Key="EnableMotionCardSuccess">Motion control card enabled.</sys:String>
     <sys:String x:Key="EnableMotionCardFailure">Failed to enable the motion control card.</sys:String>
+    <sys:String x:Key="ClearAlarm">Clear Alarm</sys:String>
+
 
     <!-- Status Labels -->
     <sys:String x:Key="AxisStatusLabel">Axis Status</sys:String>

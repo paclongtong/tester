@@ -71,7 +71,8 @@
     <sys:String x:Key="InvalidParametersMessage">Veuillez entrer des paramètres valides !</sys:String>
     <sys:String x:Key="EnableMotionCardSuccess">Carte de contrôle de mouvement activée.</sys:String>
     <sys:String x:Key="EnableMotionCardFailure">Échec de l'activation de la carte de contrôle de mouvement.</sys:String>
-
+    <sys:String x:Key="ClearAlarm">Réinitialiser l'alarme</sys:String>
+    
     <!-- Status Labels -->
     <sys:String x:Key="AxisStatusLabel">État de l'axe</sys:String>
     <sys:String x:Key="EtherCATLabel">EtherCAT</sys:String>

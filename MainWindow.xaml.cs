@@ -654,5 +654,18 @@ namespace friction_tester
             _motorController._motionCard.GA_Close(); // Close the motion card connection
             base.OnClosed(e);
         }
+
+        private void ClearAlarmButton_Click(object sender, RoutedEventArgs e)
+        {
+            int result = _motorController._motionCard.GA_ClrSts(1, 1);
+            if (result != 0)
+            {
+                MessageBox.Show($"Failed to clear alarm. Error code: {result}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                Logger.Log("Alarm cleared.");
+            }
+        }
     }
 }

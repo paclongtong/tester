@@ -14,7 +14,7 @@
     <sys:String x:Key="SaveSettings">Сохранить настройки</sys:String>
     <sys:String x:Key="FrictionTest">Тест на трение</sys:String>
     <sys:String x:Key="SpeedTest">Тест скорости</sys:String>
-    <sys:String x:Key="DefineOrigin">Определить начальную точку (не нажимайте, если не меняете)</sys:String>
+    <sys:String x:Key="DefineOrigin">Задать ноль</sys:String>
     <sys:String x:Key="Velocity">Скорость (мм/с)</sys:String>
     <sys:String x:Key="Acceleration">Ускорение (мм/с²)</sys:String>
     <sys:String x:Key="Start">Начало (мм)</sys:String>
@@ -70,7 +70,8 @@
     <sys:String x:Key="InvalidParametersMessage">Пожалуйста, введите допустимые параметры!</sys:String>
     <sys:String x:Key="EnableMotionCardSuccess">Карта управления движением включена.</sys:String>
     <sys:String x:Key="EnableMotionCardFailure">Не удалось включить карту управления движением.</sys:String>
-
+    <sys:String x:Key="ClearAlarm">Сброс тревоги</sys:String>
+    
     <!-- Status Labels -->
     <sys:String x:Key="AxisStatusLabel">Статус оси</sys:String>
     <sys:String x:Key="EtherCATLabel">EtherCAT</sys:String>

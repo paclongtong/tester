@@ -70,6 +70,7 @@
     <sys:String x:Key="InvalidParametersMessage">请输入有效的参数！</sys:String>
     <sys:String x:Key="EnableMotionCardSuccess">打开运动控制卡成功！</sys:String>
     <sys:String x:Key="EnableMotionCardFailure">打开运动控制卡失败！</sys:String>
+    <sys:String x:Key="ClearAlarm">清除报警</sys:String>
 
     <!-- Status Labels -->
     <sys:String x:Key="AxisStatusLabel">轴状态</sys:String>
