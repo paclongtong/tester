@@ -72,6 +72,25 @@
     <sys:String x:Key="EnableMotionCardSuccess">Motion control card enabled.</sys:String>
     <sys:String x:Key="EnableMotionCardFailure">Failed to enable the motion control card.</sys:String>
 
+    <!-- Status Labels -->
+    <sys:String x:Key="AxisStatusLabel">Axis Status</sys:String>
+    <sys:String x:Key="EtherCATLabel">EtherCAT</sys:String>
+    <sys:String x:Key="SensorValueLabel">Sensor Value</sys:String>
+
+    <!-- Axis Status Values -->
+    <sys:String x:Key="Enabled">Enabled</sys:String>
+    <sys:String x:Key="Disabled">Disabled</sys:String>
+    <sys:String x:Key="Running">Running</sys:String>
+    <sys:String x:Key="Homing">Homing</sys:String>
+    <sys:String x:Key="EmergencyStop">Emergency Stop</sys:String>
+    <sys:String x:Key="Alarm">Driver Alarm</sys:String>
+    <sys:String x:Key="Unknown">Unknown</sys:String>
+
+    <!-- EtherCAT Status Values -->
+    <sys:String x:Key="Initialized">Initialized</sys:String>
+    <sys:String x:Key="NotInitialized">Not Initialized</sys:String>
+    <sys:String x:Key="Initializing">Initializing</sys:String>
+
 
 
 

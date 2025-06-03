@@ -72,5 +72,23 @@
     <sys:String x:Key="EnableMotionCardSuccess">Carte de contrôle de mouvement activée.</sys:String>
     <sys:String x:Key="EnableMotionCardFailure">Échec de l'activation de la carte de contrôle de mouvement.</sys:String>
 
+    <!-- Status Labels -->
+    <sys:String x:Key="AxisStatusLabel">État de l'axe</sys:String>
+    <sys:String x:Key="EtherCATLabel">EtherCAT</sys:String>
+    <sys:String x:Key="SensorValueLabel">Valeur du capteur</sys:String>
+
+    <!-- Axis Status Values -->
+    <sys:String x:Key="Enabled">Activé</sys:String>
+    <sys:String x:Key="Disabled">Désactivé</sys:String>
+    <sys:String x:Key="Running">En cours</sys:String>
+    <sys:String x:Key="Homing">Origine</sys:String>
+    <sys:String x:Key="EmergencyStop">Arrêt d'urgence</sys:String>
+    <sys:String x:Key="Alarm">Alarme</sys:String>
+    <sys:String x:Key="Unknown">Inconnu</sys:String>
+
+    <!-- EtherCAT Status Values -->
+    <sys:String x:Key="Initialized">Initialisé</sys:String>
+    <sys:String x:Key="NotInitialized">Non initialisé</sys:String>
+    <sys:String x:Key="Initializing">Initialisation</sys:String>
 
 </ResourceDictionary>

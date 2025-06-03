@@ -71,4 +71,23 @@
     <sys:String x:Key="EnableMotionCardSuccess">Карта управления движением включена.</sys:String>
     <sys:String x:Key="EnableMotionCardFailure">Не удалось включить карту управления движением.</sys:String>
 
+    <!-- Status Labels -->
+    <sys:String x:Key="AxisStatusLabel">Статус оси</sys:String>
+    <sys:String x:Key="EtherCATLabel">EtherCAT</sys:String>
+    <sys:String x:Key="SensorValueLabel">Значение датчика</sys:String>
+
+    <!-- Axis Status Values -->
+    <sys:String x:Key="Enabled">Включен</sys:String>
+    <sys:String x:Key="Disabled">Отключен</sys:String>
+    <sys:String x:Key="Running">Работает</sys:String>
+    <sys:String x:Key="Homing">Поиск дома</sys:String>
+    <sys:String x:Key="EmergencyStop">Аварийная остановка</sys:String>
+    <sys:String x:Key="Alarm">Сигнализация привода</sys:String> 
+    <sys:String x:Key="Unknown">Неизвестно</sys:String>
+
+    <!-- EtherCAT Status Values -->
+    <sys:String x:Key="Initialized">Инициализирован</sys:String>
+    <sys:String x:Key="NotInitialized">Не инициализирован</sys:String>
+    <sys:String x:Key="Initializing">Инициализация</sys:String>
+
 </ResourceDictionary>

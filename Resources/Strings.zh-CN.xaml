@@ -71,6 +71,25 @@
     <sys:String x:Key="EnableMotionCardSuccess">打开运动控制卡成功！</sys:String>
     <sys:String x:Key="EnableMotionCardFailure">打开运动控制卡失败！</sys:String>
 
+    <!-- Status Labels -->
+    <sys:String x:Key="AxisStatusLabel">轴状态</sys:String>
+    <sys:String x:Key="EtherCATLabel">EtherCAT</sys:String>
+    <sys:String x:Key="SensorValueLabel">传感器值</sys:String>
+
+    <!-- Axis Status Values -->
+    <sys:String x:Key="Enabled">已启用</sys:String>
+    <sys:String x:Key="Disabled">已禁用</sys:String>
+    <sys:String x:Key="Running">运行中</sys:String>
+    <sys:String x:Key="Homing">回零中</sys:String>
+    <sys:String x:Key="EmergencyStop">紧急停止</sys:String>
+    <sys:String x:Key="Alarm">驱动器报警</sys:String>
+    <sys:String x:Key="Unknown">未知</sys:String>
+
+    <!-- EtherCAT Status Values -->
+    <sys:String x:Key="Initialized">已初始化</sys:String>
+    <sys:String x:Key="NotInitialized">未初始化</sys:String>
+    <sys:String x:Key="Initializing">初始化中</sys:String>
+
 
 
 </ResourceDictionary>

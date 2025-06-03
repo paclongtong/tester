@@ -28,6 +28,7 @@ namespace friction_tester
         private System.Timers.Timer _estopTimer;
         public event Action OnEStopTriggered;
         private CancellationTokenSource _moveCancellationTokenSource;
+        
         public void Initialize()
         {
             int iRes = 0;
@@ -86,6 +87,7 @@ namespace friction_tester
             }
 
         }
+
         public void StartEStopMonitor()
         {
             _estopTimer = new System.Timers.Timer(50);   // poll every 50 ms

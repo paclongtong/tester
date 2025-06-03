@@ -76,7 +76,7 @@ public class SimulatedMotionController : IMotionController
     public void HandleExternalInput(int inputCode)
     { return; }
 
-    public Task MoveToPositionAsync(double position, int maxVelocity, double acceleration)
+    public Task MoveToPositionAsync(double position, int maxVelocity, double acceleration, CancellationToken cancellationToken = default)
     {
         MoveToPosition(position, maxVelocity, acceleration);
         return Task.CompletedTask;

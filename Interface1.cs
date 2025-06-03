@@ -11,7 +11,7 @@ namespace friction_tester
         MultiCardCS.MultiCardCS _motionCard { get; set; }
         void SetOrigin(short numStation);
         void MoveToPosition(double position, int maxVelocity, double acceleration);
-        Task MoveToPositionAsync(double position, int maxVelocity, double acceleration);
+        Task MoveToPositionAsync(double position, int maxVelocity, double acceleration, CancellationToken cancellationToken = default);
         double GetCurrentPosition();
         bool IsMovementDone();
         void Stop();

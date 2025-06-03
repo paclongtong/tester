@@ -44,6 +44,8 @@ namespace friction_tester
         private string _preload;
         private string _sealLubrication;
 
+        private StatusPanelViewModel _statusPanelViewModel;
+
         public string GuideModel
         {
             get => _guideModel;
@@ -93,7 +95,6 @@ namespace friction_tester
         {
             InitializeComponent();
             InitializePlot();
-
             _isHandwheelOn = true;
 
             //AppConfig config = ConfigManager.LoadConfig(); // Load settings on startup
@@ -112,7 +113,7 @@ namespace friction_tester
             DataContext = new MainViewModel(_testController);
 
             LoadConfigOnStartup();
-
+            InitializeStatusPanel();
             _testController.OnTestStarted += () =>
             {
                 _isTestRunning = true;
@@ -139,6 +140,18 @@ namespace friction_tester
                 });
             };
 
+        }
+
+        private void InitializeStatusPanel()
+        {
+            // Initialize the status panel ViewModel
+            _statusPanelViewModel = new StatusPanelViewModel(_testController);
+
+            // Set the DataContext for the status panel
+            // If your status panel is named "StatusPanel", use:
+            // StatusPanel.DataContext = _statusPanelViewModel;
+            // Or set it as part of the main window's DataContext
+            this.DataContext = _statusPanelViewModel;
         }
 
         private void LoadConfigOnStartup()
@@ -633,6 +646,13 @@ namespace friction_tester
                 Logger.LogException(ex);
                 MessageBox.Show($"Error when clearing sensor data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _statusPanelViewModel?.Dispose();
+            _motorController._motionCard.GA_Close(); // Close the motion card connection
+            base.OnClosed(e);
         }
     }
 }
