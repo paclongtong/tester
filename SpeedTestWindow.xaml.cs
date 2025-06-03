@@ -50,6 +50,7 @@ namespace friction_tester
             // Perform the back-and-forth movement for the specified number of repetitions.
             try
             {
+                _motionController._motionCard.GA_AxisOn(1); // Ensure the axis is powered on
                 for (int i = 0; i < repetitions; i++)
                 {
                     // Move to the start position.
@@ -98,7 +99,7 @@ namespace friction_tester
 
             Logger.Log("Speed test completed.");
             MessageBox.Show("速度测试完成 Speed test completed.", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-            this.Close();
+            //this.Close();
         }
     }
 }

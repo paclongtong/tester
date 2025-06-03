@@ -9,6 +9,7 @@ using System.IO;
 using static MultiCardCS.MultiCardCS;
 using System.Windows;
 using System.Security.Principal;
+using System.Threading;
 
 namespace friction_tester
 {
@@ -17,7 +18,7 @@ namespace friction_tester
     {
         private double _currentPosition = 0;
         private bool _isMoving = false;
-        private readonly short AxisNumber = 1; // Default axis for motion control
+        public readonly short AxisNumber = 1; // Default axis for motion control
         public MultiCardCS.MultiCardCS _motionCard { get; set; }
         public bool IsHandwheelMode { get; set; } = false; // Default to automatic 
         public bool IsJoystickMode { get; set; } = false; // Default to automatic mode
@@ -26,6 +27,7 @@ namespace friction_tester
         private bool isJogging = false;
         private System.Timers.Timer _estopTimer;
         public event Action OnEStopTriggered;
+        private CancellationTokenSource _moveCancellationTokenSource;
         public void Initialize()
         {
             int iRes = 0;
@@ -42,7 +44,6 @@ namespace friction_tester
                 {
                     MessageBox.Show(LocalizationHelper.GetLocalizedString("EnableMotionCardFailure"));
                     Logger.Log("Failed to intialize motion control card.");
-                    //throw new Exception("打开运动控制卡失败");
                 }
                 else
                 {
@@ -50,9 +51,6 @@ namespace friction_tester
                     Logger.Log("Motion controll card enabled");
                 }
                 //LogError("Failed to open motion control card.");
-
-                //result = _motionCard.GA_Reset();
-                //if (result != 0) throw new Exception("重置运动控制卡失败");
 
                 _motionCard.GA_ECatLoadPDOConfig(0);
                 Task.Delay(500);
@@ -64,11 +62,11 @@ namespace friction_tester
                 if (result != 0)
                 {
                     Logger.Log("EtherCAT initialization failed.");
-                    //throw new Exception("EtherCAT 初始化失败");
+                    //throw new Exception("EtherCAT failed");
                     MessageBox.Show(GetLocalizedString("EtherCATInitFail"), GetLocalizedString("Error"), MessageBoxButton.OK);
                 }
                 else if (result == 1) {
-                    Logger.Log("EtherCAT 初始化成功 initialization succeeded");
+                    Logger.Log("EtherCAT initialization succeeded");
                 }
 
                 // 1a) Tell the motion card which I/O bit is your E-stop (args: cardNo, port, bitMask, debounce_ms)
@@ -184,7 +182,7 @@ namespace friction_tester
             _motionCard.GA_ECatSetOrgPosCur(numStation);
         }
 
-        public async Task MoveToPositionAsync(double position, int maxVelocity, double acceleration)
+        public async Task MoveToPositionAsync(double position, int maxVelocity, double acceleration, CancellationToken cancellationToken = default)
         {
             if (IsHandwheelMode || IsJoystickMode || isJogging)
             {
@@ -202,6 +200,7 @@ namespace friction_tester
                 velStart = 0,
                 smoothTime = 0  // Smooth time to be defined in configuration file
             };
+            _moveCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
                 //使能轴（通常设置一次即可，不是每次必须）
@@ -217,7 +216,6 @@ namespace friction_tester
                     throw new Exception("设置指定轴为点位模式失败");
                 }
                 result = _motionCard.GA_SetTrapPrm(AxisNumber, ref trapPrm);
-                //Logger.Log($"MoveToPosition: GA_SetTrapPrm returned {result}");
                 if (result != 0)
                     throw new Exception("梯形运动参数设置出错");
                 result = _motionCard.GA_SetPos(AxisNumber, (int)position);
@@ -232,20 +230,29 @@ namespace friction_tester
                     throw new Exception("无法启动点位运动");
 
                 // Small delay to ensure motion has started
-                await Task.Delay(50);
+                await Task.Delay(50, _moveCancellationTokenSource.Token);
 
                 // Wait for movement to complete
                 while (!IsMovementDone())
                 {
-                    await Task.Delay(10);
+                    if (_moveCancellationTokenSource.Token.IsCancellationRequested)
+                    {
+                        Logger.Log("MoveToPositionAsync cancelled by token.");
+                        break;
+                    }
+                    await Task.Delay(10, _moveCancellationTokenSource.Token);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                Logger.Log("MoveToPositionAsync operation cancelled.");
             }
             finally
             {
                 _isMoving = false;
+                _moveCancellationTokenSource?.Dispose();
+                _moveCancellationTokenSource = null;
             }
-
-
         }
 
         public void MoveToPosition(double position, int maxVelocity, double acceleration)
@@ -344,40 +351,21 @@ namespace friction_tester
                 MessageBox.Show("Manual mode 手动模式下，忽略停止按键功能");
                 return;
             }
-
-            //short iAxisStatus = 0;
-            ////int iClock = 0;
-            //int result = _motionCard.GA_HomeGetSts(AxisNumber, ref iAxisStatus);
-            //if ( result == 1)  
-            //{
-            //    result = _motionCard.GA_HomeStop(AxisNumber);
-            //    if (result == 0)
-            //    {
-            //        Logger.Log("回零过程中触发停止");
-            //    }
-            //}
-            //else if (result == 0)
-            //{
-            //    _motionCard.GA_Stop(0XFFFFF, 0XFFFFF);
-            //    Logger.Log("常规停止功能触发");
-            //}
-            //else
-            //{
-            //    _motionCard.GA_Stop(0XFFFFF, 0XFFFFF);
-            //    Logger.Log("常规停止功能触发");
-            //}
             int result = _motionCard.GA_Stop(0XFFFFF, 0XFFFFF);
             Logger.Log("常规停止功能触发");
             if (result != 0) throw new Exception("Failed to stop motion.");
             _isMoving = false;
+            CancelMove();
         }
 
         public void EStop()
         {
             int result = _motionCard.GA_Stop(0XFFFFF, 0XFFFFF);
+            int result_axisoff = _motionCard.GA_AxisOff(AxisNumber);
             Logger.Log("Emergency stop function executed.");
             if (result != 0) throw new Exception("Failed to Estop motion.");
             _isMoving = false;
+            CancelMove();
         }
 
         // **Three-Color Light Output**    //  AXIS_STATUS_HOME_RUNNING = 0x00001000
@@ -688,6 +676,14 @@ namespace friction_tester
             catch (Exception ex)
             {
                 Logger.Log($"Exception in StopJogMotion: {ex.Message}");
+            }
+        }
+
+        public void CancelMove()
+        {
+            if (_moveCancellationTokenSource != null && !_moveCancellationTokenSource.IsCancellationRequested)
+            {
+                _moveCancellationTokenSource.Cancel();
             }
         }
     }

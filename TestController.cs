@@ -17,6 +17,7 @@ namespace friction_tester
         internal IMotionController _motorController;
         public DataAcquisition _dataAcquisition;
         private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _moveCancellationTokenSource;
 
         private readonly TestResultsRepository _repository;
         public event Action OnTestStarted;
@@ -48,15 +49,18 @@ namespace friction_tester
 
             var testName = $"{workpieceName}_{DateTime.Now:yyyyMMddHHmmss}";
 
+            _moveCancellationTokenSource = new CancellationTokenSource();
             try
             {
                 Logger.Log($"Moving to start position: {x1}mm");
-                await _motorController.MoveToPositionAsync(x1 * 1000, (int)speed, acceleration); // question
+                await _motorController.MoveToPositionAsync(x1 * 1000, (int)speed, acceleration, _moveCancellationTokenSource.Token); // question
                 _motorController.HandleExternalInput(1);
                 Logger.Log($"Moving to end position: {x2}mm with data collection");
-                var moveTask = _motorController.MoveToPositionAsync(x2 * 1000, (int)speed, acceleration);
+                var moveTask = _motorController.MoveToPositionAsync(x2 * 1000, (int)speed, acceleration, _moveCancellationTokenSource.Token);
                 while (!_motorController.IsMovementDone())
                 {
+                    if (_moveCancellationTokenSource.Token.IsCancellationRequested)
+                        break;
                     double position = _motorController.GetCurrentPosition() / 1000;
                     SensorData data = null;
                     try
@@ -89,6 +93,8 @@ namespace friction_tester
             }
             finally
             {
+                _moveCancellationTokenSource?.Dispose();
+                _moveCancellationTokenSource = null;
                 OnTestCompleted?.Invoke();
             }
 
@@ -98,19 +104,18 @@ namespace friction_tester
         {
             return Task.Run(async () =>
             {
-
                 _motorController.HandleExternalInput(2);
-
                 double speed = ConfigManager.Config.Axes[0].HomeReturnSpeed;
                 double acceleration = 20;
                 _motorController.HandleExternalInput(1);
-                await _motorController.MoveToPositionAsync(0, (int)speed, acceleration);
+                _moveCancellationTokenSource = new CancellationTokenSource();
+                await _motorController.MoveToPositionAsync(0, (int)speed, acceleration, _moveCancellationTokenSource.Token);
                 _motorController.HandleExternalInput(2);
-            }, _cancellationTokenSource.Token);
+            });
         }
         public Task StopTestAsync()
         {
-            // offload to background so we don’t block UI thread
+            // offload to background so we don't block UI thread
             return Task.Run(() => StopTest());
         }
         public void StopTest()
@@ -123,6 +128,7 @@ namespace friction_tester
                     _cancellationTokenSource.Dispose();
                     _cancellationTokenSource = new CancellationTokenSource();
                 }
+                _moveCancellationTokenSource?.Cancel();
                 _motorController.Stop();
                 _motorController.HandleExternalInput(2);
                 _dataAcquisition.ClearBuffer();

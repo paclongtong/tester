@@ -173,6 +173,7 @@ namespace friction_tester
                             // Using origin signal as hard limit (second parameter = 0)
                             // Using main card (third parameter = 0)
                             // IO index 7 (fourth parameter = 7)
+                            _motorController._motionCard.GA_LmtsOn(_axisNumber, -1); // Enable hard limits
                             result = _motorController._motionCard.GA_SetHardLimP(_axisNumber, 0, 0, 7);
 
                             if (result != 0)
@@ -184,12 +185,13 @@ namespace friction_tester
                         {
                             // Disable hard limits by setting soft limits to maximum range
                             // This effectively disables hard limit functionality
-                            result = _motorController._motionCard.GA_SetSoftLimit(_axisNumber, 2147483647, -2147483648);
+                            //result = _motorController._motionCard.GA_SetSoftLimit(_axisNumber, 2147483647, -2147483648);
+                            //result = _motorController._motionCard.GA_LmtsOff(_axisNumber, -1);
 
-                            if (result != 0)
-                            {
-                                Console.WriteLine($"Failed to disable hard limits. Error code: {result}");
-                            }
+                            //if (result != 0)
+                            //{
+                            //    Console.WriteLine($"Failed to disable hard limits. Error code: {result}");
+                            //}
                         }
                     }
                     catch (Exception ex)
