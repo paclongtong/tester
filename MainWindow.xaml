@@ -245,6 +245,7 @@
                 <!-- New Status Panel below the Chart and above all bottom buttons -->
                 <!-- ======================== -->
                 <StackPanel DockPanel.Dock="Bottom"
+            x:Name="StatusDisplayPanel"
             Orientation="Horizontal"
             HorizontalAlignment="Center"
             Background="#E0E0E0"

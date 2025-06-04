@@ -48,9 +48,12 @@ namespace friction_tester
             _testController = testController;
             _testController.OnDataCollected += data =>
             {
+                Logger.Log($"[MainViewModel] OnDataCollected received data. Position: {data.Position}, SensorValue: {data.SensorValue}"); // DIAGNOSTIC LOG
                 lock (_bufferedPoints)
                 {
                     _bufferedPoints.Add(new DataPoint(data.Position, data.SensorValue));
+
+                    Logger.Log($"[MainViewModel] Buffer now contains {_bufferedPoints.Count} points. Latest position: {data.Position}");
                 }
             };
             InitializePlot();
@@ -118,6 +121,14 @@ namespace friction_tester
                         FrictionPlotModel.Axes[1].Minimum = yMin - margin;
                         FrictionPlotModel.Axes[1].Maximum = yMax + margin;
 
+                        // ADD THIS: Adjust X-axis dynamically (missing in original code)
+                        var xMin = lineSeries.Points.Min(p => p.X);
+                        var xMax = lineSeries.Points.Max(p => p.X);
+                        var xRange = xMax - xMin;
+                        var xMargin = Math.Max(xRange * 0.05, 1.0); // Ensure minimum margin of 1mm
+                        FrictionPlotModel.Axes[0].Minimum = xMin - xMargin;
+                        FrictionPlotModel.Axes[0].Maximum = xMax + xMargin;
+
                         _bufferedPoints.Clear(); // Clear the buffer after processing
                         FrictionPlotModel.InvalidatePlot(true); // Refresh the plot
                     }
@@ -148,11 +159,11 @@ namespace friction_tester
             }
 
             // Move the testing head back to the origin (assuming origin is 0.0)
-            if (_testController != null)
-            {
-                //_testController.StopTest(); // Stop any ongoing test
-                _testController.ResetPosition(); // Command to move to position 0
-            }
+            //if (_testController != null)
+            //{
+            //    //_testController.StopTest(); // Stop any ongoing test
+            //    //_testController.ResetPosition(); // Command to move to position 0
+            //}
         }
 
         protected void OnPropertyChanged(string name)

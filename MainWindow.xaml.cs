@@ -19,6 +19,7 @@ using MultiCardCS;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using OxyPlot.Wpf;
+using System.Linq;
 
 namespace friction_tester
 {
@@ -95,8 +96,7 @@ namespace friction_tester
         {
             InitializeComponent();
             InitializePlot();
-            _isHandwheelOn = true;
-
+            ConfigManager.LoadConfig();
             //AppConfig config = ConfigManager.LoadConfig(); // Load settings on startup
             LanguageManager.ChangeLanguage(ConfigManager.Config.SelectedLanguage);
             //ApplyConfig(config); // Apply settings to UI
@@ -109,8 +109,13 @@ namespace friction_tester
             _testController = new TestController(isSimulationMode: _isSimulation);       // Set the simulation mode True if Motion Control Card is missing
             _motorController = _testController.GetMotionController();
             _motorController.HandleExternalInput(2);
+            // Removed: _testController.OnDataCollected += UpdateFrictionChart;
             _testController.OnDataCollected += UpdateFrictionChart;
-            DataContext = new MainViewModel(_testController);
+            // Set MainViewModel as the DataContext for the Window
+            var mainViewModel = new MainViewModel(_testController);
+            DataContext = mainViewModel;
+
+            // Removed: InitializePlot(); // MainViewModel now handles this
 
             LoadConfigOnStartup();
             InitializeStatusPanel();
@@ -136,7 +141,14 @@ namespace friction_tester
             {
                 Dispatcher.Invoke(() =>
                 {
-                    MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    // Check if SpeedTestWindow is active and visible
+                    bool speedTestWindowShowing = Application.Current.Windows.OfType<SpeedTestWindow>().Any(win => win.IsVisible);
+
+                    if (!speedTestWindowShowing)
+                    {
+                        MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    // If speedTestWindowShowing is true, SpeedTestWindow will handle its own E-stop message.
                 });
             };
 
@@ -147,11 +159,9 @@ namespace friction_tester
             // Initialize the status panel ViewModel
             _statusPanelViewModel = new StatusPanelViewModel(_testController);
 
-            // Set the DataContext for the status panel
-            // If your status panel is named "StatusPanel", use:
-            // StatusPanel.DataContext = _statusPanelViewModel;
-            // Or set it as part of the main window's DataContext
-            this.DataContext = _statusPanelViewModel;
+            // Set the DataContext for the status panel UI element
+            StatusDisplayPanel.DataContext = _statusPanelViewModel;
+            // Removed: this.DataContext = _statusPanelViewModel; // This was overriding the MainViewModel
         }
 
         private void LoadConfigOnStartup()
@@ -339,8 +349,8 @@ namespace friction_tester
                     double.TryParse(EndPositionInput.Text, out double x2))
                 {
                     Logger.Log($"Starting test with speed={speed}, acceleration={acceleration}, x1={x1}, x2={x2}");
-                    _frictionSeries.Points.Clear();
-                    FrictionPlotModel.InvalidatePlot(true);
+                    // _frictionSeries.Points.Clear();
+                    // FrictionPlotModel.InvalidatePlot(true);
 
                     await _testController.StartAutomaticTest(speed, acceleration, x1, x2, workpieceName);
 

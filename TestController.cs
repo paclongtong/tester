@@ -38,14 +38,15 @@ namespace friction_tester
 
         public async Task StartAutomaticTest(double speed, double acceleration, double x1, double x2, string workpieceName)
         {
-            if (_motorController.IsHandwheelMode)
+            if (TestStateManager.IsTestInProgress && _motorController.IsHandwheelMode)
             {
-                Logger.Log("Automatic test start blocked: Handwheel mode is active.");
-                MessageBox.Show("自动测试开始被阻止：手轮模式已激活，请先关闭手轮模式 | Disable Handwheel first");
+                Logger.Log("Automatic test start blocked: Another test is in progress or Handwheel mode is active.");
+                MessageBox.Show("测试进行中或手轮模式已激活，请稍后再试 | Test in progress or Handwheel mode active, please try again later.");
                 return;
             }
 
-            OnTestStarted?.Invoke(); // Notify UI that test is starting
+            TestStateManager.NotifyTestStarted();
+            OnTestStarted?.Invoke();
 
             var testName = $"{workpieceName}_{DateTime.Now:yyyyMMddHHmmss}";
 
@@ -88,7 +89,6 @@ namespace friction_tester
             {
                 MessageBox.Show("自动模式运行时出错，请检查日志 Error occurred, please check logs", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 Logger.LogException(ex);
-                //OnTestCompleted?.Invoke();
                 throw; // Rethrow the exception to be handled by the caller
             }
             finally
@@ -96,21 +96,33 @@ namespace friction_tester
                 _moveCancellationTokenSource?.Dispose();
                 _moveCancellationTokenSource = null;
                 OnTestCompleted?.Invoke();
+                TestStateManager.NotifyTestCompleted();
             }
 
         }
 
         public Task ResetPosition()
         {
+            Logger.Log("[TestController] ResetPosition called.");
             return Task.Run(async () =>
             {
-                _motorController.HandleExternalInput(2);
-                double speed = ConfigManager.Config.Axes[0].HomeReturnSpeed;
-                double acceleration = 20;
-                _motorController.HandleExternalInput(1);
-                _moveCancellationTokenSource = new CancellationTokenSource();
-                await _motorController.MoveToPositionAsync(0, (int)speed, acceleration, _moveCancellationTokenSource.Token);
-                _motorController.HandleExternalInput(2);
+                try
+                {
+                    _motorController.HandleExternalInput(2); // Light Green
+                    double speed = ConfigManager.Config.Axes[0].HomeReturnSpeed;
+                    double acceleration = 20; // Default acceleration for reset
+                    Logger.Log($"[TestController] ResetPosition: Speed={speed}, Acceleration={acceleration}. Moving to position 0.");
+
+                    _motorController.HandleExternalInput(1); // Light Yellow
+                    _moveCancellationTokenSource = new CancellationTokenSource();
+                    await _motorController.MoveToPositionAsync(0, (int)speed, acceleration, _moveCancellationTokenSource.Token);
+                    Logger.Log("[TestController] ResetPosition: MoveToPositionAsync(0) completed.");
+                    _motorController.HandleExternalInput(2); // Light Green
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex);
+                }
             });
         }
         public Task StopTestAsync()

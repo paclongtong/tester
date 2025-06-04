@@ -4,12 +4,15 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using friction_tester;
+using MultiCardCS;
+using static MultiCardCS.MultiCardCS.TJogPrm;
 using static MultiCardCS.MultiCardCS;
 
-public class StatusPanelViewModel : INotifyPropertyChanged
+public class StatusPanelViewModel : INotifyPropertyChanged, IDisposable
 {
     private readonly DispatcherTimer _statusTimer;
     private readonly TestController _testController;
+    private bool _isTestInProgress = false; // Flag to indicate if a test is running
 
     // Status properties
     private string _axisStatusText;
@@ -22,6 +25,9 @@ public class StatusPanelViewModel : INotifyPropertyChanged
     public StatusPanelViewModel(TestController testController)
     {
         _testController = testController;
+
+        // Subscribe to TestStateManager's event
+        TestStateManager.OnTestActivityChanged += HandleTestActivityChanged;
 
         // Initialize timer for polling status
         _statusTimer = new DispatcherTimer
@@ -128,7 +134,7 @@ public class StatusPanelViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             // Log exception but don't stop polling
-            System.Diagnostics.Debug.WriteLine($"Status update error: {ex.Message}");
+            Logger.Log($"Status update error: {ex.Message}");
         }
     }
 
@@ -137,13 +143,15 @@ public class StatusPanelViewModel : INotifyPropertyChanged
         try
         {
             // Get all system status
-            TAllSysStatusDataSX statusData = new TAllSysStatusDataSX();
-            int result = _testController._motorController._motionCard.GA_GetAllSysStatusSX(ref statusData);
+            //TAllSysStatusDataSX statusData = new TAllSysStatusDataSX();
+            //int result = _testController._motorController._motionCard.GA_GetAllSysStatusSX(ref statusData);
+            int axisStatus = 0;
+            int iClock = 0;
+
+            int result = _testController._motorController._motionCard.GA_GetSts(1, ref axisStatus, 1, ref iClock); // the first 1 as in axisNumber, the third 1 is a fixed value
 
             if (result == 0)
             {
-                // Check first axis status (axis 0)
-                int axisStatus = statusData.lAxisStatus[0];
 
                 // Check if axis is enabled
                 bool isEnabled = (axisStatus & AXIS_STATUS_ENABLE) != 0;
@@ -234,6 +242,12 @@ public class StatusPanelViewModel : INotifyPropertyChanged
 
     private async Task UpdateSensorValueAsync()
     {
+        if (_isTestInProgress)
+        {
+            // SensorValueText = "Testing..."; // Or some other indicator
+            return; // Skip polling if a test is active
+        }
+
         try
         {
             if (_testController._dataAcquisition != null)
@@ -277,6 +291,29 @@ public class StatusPanelViewModel : INotifyPropertyChanged
     {
         StopPolling();
         _statusTimer?.Stop();
+        // Unsubscribe from TestStateManager's event
+        TestStateManager.OnTestActivityChanged -= HandleTestActivityChanged;
+        
+        // Removed: Unsubscribe from _testController events as they are no longer used here for test state
+        // if (_testController != null)
+        // {
+        //     _testController.OnTestStarted -= TestController_OnTestStarted;
+        //     _testController.OnTestCompleted -= TestController_OnTestCompleted;
+        // }
+    }
+
+    private void HandleTestActivityChanged(bool isTestActive)
+    {
+        _isTestInProgress = isTestActive;
+        if (isTestActive)
+        {
+            Logger.Log("[StatusPanelViewModel] TestStateManager reported test started, sensor polling paused.");
+            // SensorValueText = "Testing..."; // Optional: Update UI to indicate testing
+        }
+        else
+        {
+            Logger.Log("[StatusPanelViewModel] TestStateManager reported all tests completed, sensor polling resumed.");
+        }
     }
 
     // Axis status constants (matching your definitions)

@@ -186,72 +186,86 @@ namespace friction_tester
 
         public async Task MoveToPositionAsync(double position, int maxVelocity, double acceleration, CancellationToken cancellationToken = default)
         {
+            Logger.Log($"[RealMotionController] MoveToPositionAsync called. Position: {position}, Velocity: {maxVelocity}, Acceleration: {acceleration}");
             if (IsHandwheelMode || IsJoystickMode || isJogging)
             {
-                Logger.Log("Attempted to move while in Handwheel mode: Manual mode is active.");
+                Logger.Log("[RealMotionController] MoveToPositionAsync: Aborted. Manual mode (Handwheel, Joystick, or Jogging) is active.");
                 return;
             }
-            short AxisNumber = 1;
+            short localAxisNumber = this.AxisNumber; // Use the class member AxisNumber
             _isMoving = true;
             int iRes = 0;
-            acceleration = acceleration / 1000; // Convert from pulse/ms^2 to mm/s^2
+            double accInPulsesPerMsSq = acceleration / 1000.0; // Assuming acceleration is in mm/s^2 and needs conversion
+
             var trapPrm = new TTrapPrm
             {
-                acc = acceleration,
-                dec = acceleration,
+                acc = accInPulsesPerMsSq,
+                dec = accInPulsesPerMsSq, // Assuming deceleration is same as acceleration
                 velStart = 0,
-                smoothTime = 0  // Smooth time to be defined in configuration file
+                smoothTime = 0  // Smooth time to be defined in configuration file or set to a default
             };
+            Logger.Log($"[RealMotionController] TrapPrm: acc={trapPrm.acc}, dec={trapPrm.dec}, velStart={trapPrm.velStart}, smoothTime={trapPrm.smoothTime}");
+
             _moveCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
-                //使能轴（通常设置一次即可，不是每次必须）
-                iRes = _motionCard.GA_AxisOn(AxisNumber);
-                Logger.Log($"MoveToPosition: GA_AxisOn returned {iRes}");
-                //设置为点位模式（通常设置一次即可，不是每次必须）
-                int result = _motionCard.GA_PrfTrap(AxisNumber);
-                Logger.Log($"MoveToPosition: GA_PrfTrap returned {result}");
+                iRes = _motionCard.GA_AxisOn(localAxisNumber);
+                Logger.Log($"[RealMotionController] GA_AxisOn(Axis: {localAxisNumber}) returned: {iRes}");
+                if (iRes != 0) throw new Exception($"GA_AxisOn failed with code {iRes}");
 
-                if (result != 0)
+                iRes = _motionCard.GA_PrfTrap(localAxisNumber);
+                Logger.Log($"[RealMotionController] GA_PrfTrap(Axis: {localAxisNumber}) returned: {iRes}");
+                if (iRes != 0)
                 {
-                    MessageBox.Show("设置点位运动模式失败");
-                    throw new Exception("设置指定轴为点位模式失败");
+                    MessageBox.Show("设置点位运动模式失败 (GA_PrfTrap failed)");
+                    throw new Exception($"GA_PrfTrap failed with code {iRes}");
                 }
-                result = _motionCard.GA_SetTrapPrm(AxisNumber, ref trapPrm);
-                if (result != 0)
-                    throw new Exception("梯形运动参数设置出错");
-                result = _motionCard.GA_SetPos(AxisNumber, (int)position);
-                if (result != 0)
-                    throw new Exception("目标位置设置出错");
-                result = _motionCard.GA_SetVel(AxisNumber, (int)maxVelocity);
-                if (result != 0)
-                    throw new Exception("设置最高速度出错");
-                result = _motionCard.GA_Update(1 << (AxisNumber - 1));
-                Logger.Log($"MoveToPosition: GA_Update returned {result}");
-                if (result != 0)
-                    throw new Exception("无法启动点位运动");
 
-                // Small delay to ensure motion has started
-                await Task.Delay(50, _moveCancellationTokenSource.Token);
+                iRes = _motionCard.GA_SetTrapPrm(localAxisNumber, ref trapPrm);
+                Logger.Log($"[RealMotionController] GA_SetTrapPrm(Axis: {localAxisNumber}) returned: {iRes}");
+                if (iRes != 0) throw new Exception($"GA_SetTrapPrm failed with code {iRes}");
 
-                // Wait for movement to complete
+                iRes = _motionCard.GA_SetPos(localAxisNumber, (int)position);
+                Logger.Log($"[RealMotionController] GA_SetPos(Axis: {localAxisNumber}, Position: {(int)position}) returned: {iRes}");
+                if (iRes != 0) throw new Exception($"GA_SetPos failed with code {iRes}");
+
+                iRes = _motionCard.GA_SetVel(localAxisNumber, (double)maxVelocity); // Ensure GA_SetVel takes double for velocity
+                Logger.Log($"[RealMotionController] GA_SetVel(Axis: {localAxisNumber}, Velocity: {maxVelocity}) returned: {iRes}");
+                if (iRes != 0) throw new Exception($"GA_SetVel failed with code {iRes}");
+
+                iRes = _motionCard.GA_Update(1 << (localAxisNumber - 1));
+                Logger.Log($"[RealMotionController] GA_Update(Mask: {1 << (localAxisNumber - 1)}) returned: {iRes}");
+                if (iRes != 0) throw new Exception($"GA_Update failed with code {iRes}");
+
+                Logger.Log("[RealMotionController] Motion commands sent. Delaying for motion to start.");
+                await Task.Delay(50, _moveCancellationTokenSource.Token); // Small delay to ensure motion has started
+
+                Logger.Log("[RealMotionController] Waiting for movement to complete.");
                 while (!IsMovementDone())
                 {
                     if (_moveCancellationTokenSource.Token.IsCancellationRequested)
                     {
-                        Logger.Log("MoveToPositionAsync cancelled by token.");
+                        Logger.Log("[RealMotionController] MoveToPositionAsync cancelled by token during movement.");
                         break;
                     }
                     await Task.Delay(10, _moveCancellationTokenSource.Token);
                 }
+                Logger.Log("[RealMotionController] Movement completed or cancelled.");
             }
             catch (OperationCanceledException)
             {
-                Logger.Log("MoveToPositionAsync operation cancelled.");
+                Logger.Log("[RealMotionController] MoveToPositionAsync operation cancelled by CancellationToken.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+                // Optionally, rethrow or handle more gracefully
+                // MessageBox.Show($"Error in MoveToPositionAsync: {ex.Message}", "Motion Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 _isMoving = false;
+                Logger.Log("[RealMotionController] MoveToPositionAsync finished. _isMoving set to false.");
                 _moveCancellationTokenSource?.Dispose();
                 _moveCancellationTokenSource = null;
             }
