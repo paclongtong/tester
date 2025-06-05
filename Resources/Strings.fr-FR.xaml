@@ -92,4 +92,58 @@
     <sys:String x:Key="NotInitialized">Non initialisé</sys:String>
     <sys:String x:Key="Initializing">Initialisation</sys:String>
 
+    <!-- Common Titles -->
+    <sys:String x:Key="ErrorTitle">Erreur</sys:String>
+    <sys:String x:Key="InvalidInputTitle">Entrée invalide</sys:String>
+    <sys:String x:Key="EStopTitle">Arrêt d'urgence</sys:String>
+    <sys:String x:Key="DataErrorTitle">Erreur de données</sys:String>
+    <sys:String x:Key="InfoTitle">Information</sys:String>
+    <sys:String x:Key="TestInProgressTitle">Test en cours</sys:String>
+    <sys:String x:Key="InputErrorTitle">Erreur de saisie</sys:String>
+    <sys:String x:Key="ExportSuccessfulTitle">Exportation réussie</sys:String>
+    <sys:String x:Key="EStopResetTitle">Réinitialisation de l'arrêt d'urgence</sys:String>
+    <sys:String x:Key="EStopSpeedTestTitle">Arrêt d'urgence (Test de vitesse)</sys:String>
+
+    <!-- Specific Messages -->
+    <sys:String x:Key="SetHomingParametersFailed">Échec de la configuration des paramètres de retour à zéro.</sys:String>
+    <sys:String x:Key="StartHomingFailed">Échec du démarrage du retour à zéro.</sys:String>
+    <sys:String x:Key="StopCommandIgnoredInManualMode">Commande d'arrêt ignorée en mode manuel.</sys:String>
+    <sys:String x:Key="ReadDataFailedErrorCode">Échec de lecture des données, code d'erreur : {0}</sys:String>
+    <sys:String x:Key="TestOrHandwheelActive">Un autre test est en cours ou le mode volant est actif. Veuillez réessayer plus tard.</sys:String>
+    <sys:String x:Key="AutoModeErrorCheckLogs">Erreur en mode automatique : {0}. Veuillez consulter les journaux.</sys:String>
+    <sys:String x:Key="SensorDataEmptyNoSave">Liste de données du capteur vide. Résultat du test non enregistré.</sys:String>
+    <sys:String x:Key="GuideModelInvalidChars">Le modèle de guide ne peut contenir que des lettres et des chiffres.</sys:String>
+    <sys:String x:Key="PreloadInvalidChars">La précharge ne peut contenir que des lettres et des chiffres.</sys:String>
+    <sys:String x:Key="SealLubricationInvalidChars">Le joint/lubrification ne peut contenir que des lettres et des chiffres.</sys:String>
+    <sys:String x:Key="EStopTriggeredMain">Arrêt d'urgence déclenché ! Veuillez réinitialiser le bouton d'arrêt avant de reprendre.</sys:String>
+    <sys:String x:Key="HomingErrorMessageFormat">{0} : {1}</sys:String>
+    <sys:String x:Key="UnexpectedErrorMessageFormat">Erreur inattendue : {0}</sys:String>
+    <sys:String x:Key="HomingStatusTitle">Statut du retour :</sys:String>
+    <sys:String x:Key="PlotSavedToMessageFormat">Graphique enregistré dans :\n{0}</sys:String>
+    <sys:String x:Key="CouldNotFindPlotModelToExport">Impossible de trouver le graphique à exporter.</sys:String>
+    <sys:String x:Key="EStopClearedResume">Arrêt d'urgence réinitialisé. Vous pouvez reprendre le mouvement.</sys:String>
+    <sys:String x:Key="SensorClearErrorMessageFormat">Erreur lors de l'effacement des données du capteur : {0}</sys:String>
+    <sys:String x:Key="ClearAlarmFailedMessageFormat">Échec du réarmement de l'alarme. Code d'erreur : {0}</sys:String>
+    <sys:String x:Key="EStopTriggeredSpeedTest">Arrêt d'urgence déclenché pendant le test de vitesse ! Veuillez réinitialiser le bouton.</sys:String>
+    <sys:String x:Key="SpeedTestInProgress">Test de vitesse en cours.</sys:String>
+    <sys:String x:Key="AnotherTestInProgress">Un autre test est en cours. Veuillez patienter.</sys:String>
+    <sys:String x:Key="InvalidSpeedTestParameters">Paramètres de test de vitesse invalides. Veuillez entrer tous les paramètres valides.</sys:String>
+    <sys:String x:Key="SpeedTestExecutionError">Une erreur est survenue pendant le test de vitesse. Veuillez consulter les journaux.</sys:String>
+
+    <!-- Status Panel Keys -->
+    <sys:String x:Key="AxisStatusEmergencyStop">Arrêt d'urgence</sys:String>
+    <sys:String x:Key="AxisStatusAlarm">Alarme</sys:String>
+    <sys:String x:Key="AxisStatusRunning">En cours</sys:String>
+    <sys:String x:Key="AxisStatusHoming">Retour à zéro</sys:String>
+    <sys:String x:Key="AxisStatusEnabled">Activé</sys:String>
+    <sys:String x:Key="AxisStatusDisabled">Désactivé</sys:String>
+    <sys:String x:Key="AxisStatusError">Erreur</sys:String>
+    <sys:String x:Key="EtherCatNotInitialized">Non initialisé</sys:String>
+    <sys:String x:Key="EtherCatInitialized">Initialisé</sys:String>
+    <sys:String x:Key="EtherCatInitializing">Initialisation</sys:String>
+    <sys:String x:Key="EtherCatStatusError">Erreur</sys:String>
+    <sys:String x:Key="SensorValueNA">N/D</sys:String>
+    <sys:String x:Key="SensorValueError">Erreur</sys:String>
+
+
 </ResourceDictionary>

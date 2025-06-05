@@ -93,8 +93,57 @@
     <sys:String x:Key="NotInitialized">Not Initialized</sys:String>
     <sys:String x:Key="Initializing">Initializing</sys:String>
 
+    <!-- Common Titles -->
+    <sys:String x:Key="ErrorTitle">Error</sys:String>
+    <sys:String x:Key="InvalidInputTitle">Invalid Input</sys:String>
+    <sys:String x:Key="EStopTitle">E-Stop</sys:String>
+    <sys:String x:Key="DataErrorTitle">Data Error</sys:String>
+    <sys:String x:Key="InfoTitle">Information</sys:String>
+    <sys:String x:Key="TestInProgressTitle">Test In Progress</sys:String>
+    <sys:String x:Key="InputErrorTitle">Input Error</sys:String>
+    <sys:String x:Key="ExportSuccessfulTitle">Export Successful</sys:String>
+    <sys:String x:Key="EStopResetTitle">E-Stop Reset</sys:String>
+    <sys:String x:Key="EStopSpeedTestTitle">E-Stop (Speed Test)</sys:String>
 
+    <!-- Specific Messages -->
+    <sys:String x:Key="SetHomingParametersFailed">Failed to set homing parameters.</sys:String>
+    <sys:String x:Key="StartHomingFailed">Failed to start homing.</sys:String>
+    <sys:String x:Key="StopCommandIgnoredInManualMode">Stop command ignored in manual mode.</sys:String>
+    <sys:String x:Key="ReadDataFailedErrorCode">Failed to read data, error code: {0}</sys:String>
+    <sys:String x:Key="TestOrHandwheelActive">Another test is in progress or Handwheel mode is active. Please try again later.</sys:String>
+    <sys:String x:Key="AutoModeErrorCheckLogs">Error occurred during automatic mode: {0}. Please check logs.</sys:String>
+    <sys:String x:Key="SensorDataEmptyNoSave">Sensor data list is empty. Test result not saved.</sys:String>
+    <sys:String x:Key="GuideModelInvalidChars">Guide Model can only contain letters and numbers.</sys:String>
+    <sys:String x:Key="PreloadInvalidChars">Preload can only contain letters and numbers.</sys:String>
+    <sys:String x:Key="SealLubricationInvalidChars">Seal/Lubrication can only contain letters and numbers.</sys:String>
+    <sys:String x:Key="EStopTriggeredMain">Emergency stop triggered! Please reset the E-stop button before resuming.</sys:String>
+    <sys:String x:Key="HomingErrorMessageFormat">{0}: {1}</sys:String>
+    <sys:String x:Key="UnexpectedErrorMessageFormat">Unexpected error: {0}</sys:String>
+    <sys:String x:Key="HomingStatusTitle">Homing Status: </sys:String>
+    <sys:String x:Key="PlotSavedToMessageFormat">Plot saved to:\n{0}</sys:String>
+    <sys:String x:Key="CouldNotFindPlotModelToExport">Could not find plot model to export.</sys:String>
+    <sys:String x:Key="EStopClearedResume">E-stop cleared. You may now resume motion.</sys:String>
+    <sys:String x:Key="SensorClearErrorMessageFormat">Error when clearing sensor data: {0}</sys:String>
+    <sys:String x:Key="ClearAlarmFailedMessageFormat">Failed to clear alarm. Error code: {0}</sys:String>
+    <sys:String x:Key="EStopTriggeredSpeedTest">Emergency stop triggered during Speed Test! Please reset the E-stop button.</sys:String>
+    <sys:String x:Key="SpeedTestInProgress">Speed test is already in progress.</sys:String>
+    <sys:String x:Key="AnotherTestInProgress">Another test is currently in progress. Please wait.</sys:String>
+    <sys:String x:Key="InvalidSpeedTestParameters">Invalid parameters for speed test. Please enter all valid arguments.</sys:String>
+    <sys:String x:Key="SpeedTestExecutionError">An error occurred during the speed test. Please check the logs.</sys:String>
 
-
+    <!-- Status Panel Keys -->
+    <sys:String x:Key="AxisStatusEmergencyStop">Emergency Stop</sys:String>
+    <sys:String x:Key="AxisStatusAlarm">Alarm</sys:String>
+    <sys:String x:Key="AxisStatusRunning">Running</sys:String>
+    <sys:String x:Key="AxisStatusHoming">Homing</sys:String>
+    <sys:String x:Key="AxisStatusEnabled">Enabled</sys:String>
+    <sys:String x:Key="AxisStatusDisabled">Disabled</sys:String>
+    <sys:String x:Key="AxisStatusError">Error</sys:String>
+    <sys:String x:Key="EtherCatNotInitialized">Not Initialized</sys:String>
+    <sys:String x:Key="EtherCatInitialized">Initialized</sys:String>
+    <sys:String x:Key="EtherCatInitializing">Initializing</sys:String>
+    <sys:String x:Key="EtherCatStatusError">Error</sys:String>
+    <sys:String x:Key="SensorValueNA">N/A</sys:String>
+    <sys:String x:Key="SensorValueError">Error</sys:String>
 
 </ResourceDictionary>

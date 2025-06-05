@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x64;ARM32;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

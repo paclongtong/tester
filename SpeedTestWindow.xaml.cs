@@ -43,7 +43,7 @@ namespace friction_tester
                 // to avoid issues if the event comes after the window is closing.
                 if (this.IsVisible)
                 {
-                    MessageBox.Show(this, "Emergency stop triggered during Speed Test! Please reset the E-stop button.", "E-stop (Speed Test)", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(this, LocalizationHelper.GetLocalizedString("EStopTriggeredSpeedTest"), LocalizationHelper.GetLocalizedString("EStopSpeedTestTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             });
         }
@@ -52,12 +52,12 @@ namespace friction_tester
         {
             if (_isSpeedTestRunning) // Prevent re-entrancy for this specific test
             {
-                MessageBox.Show("Speed test is already in progress.", "Test In Progress", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(LocalizationHelper.GetLocalizedString("SpeedTestInProgress"), LocalizationHelper.GetLocalizedString("TestInProgressTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             if (TestStateManager.IsTestInProgress) // Global check for any test
             {
-                MessageBox.Show("Another test is currently in progress. Please wait.", "Test In Progress", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(LocalizationHelper.GetLocalizedString("AnotherTestInProgress"), LocalizationHelper.GetLocalizedString("TestInProgressTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -68,7 +68,7 @@ namespace friction_tester
                 !double.TryParse(AccelerationInput.Text, out double acceleration) ||
                 !int.TryParse(RepetitionInput.Text, out int repetitions))
             {
-                MessageBox.Show("请输入所有有效参数！Invalid argument(s)", "输入错误 Input error(s)", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(LocalizationHelper.GetLocalizedString("InvalidSpeedTestParameters"), LocalizationHelper.GetLocalizedString("InputErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -128,7 +128,7 @@ namespace friction_tester
                 Logger.LogException(ex);
                 if (_isSpeedTestRunning) // Only show error if test wasn't intentionally stopped
                 {
-                   MessageBox.Show("速度测试过程中发生错误，请检查日志。An error occurred during the speed test, please check the logs.", "错误 Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                   MessageBox.Show(LocalizationHelper.GetLocalizedString("SpeedTestExecutionError"), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             finally

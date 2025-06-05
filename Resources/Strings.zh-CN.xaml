@@ -91,6 +91,60 @@
     <sys:String x:Key="NotInitialized">未初始化</sys:String>
     <sys:String x:Key="Initializing">初始化中</sys:String>
 
+    <!-- Common Titles -->
+    <sys:String x:Key="ErrorTitle">错误</sys:String>
+    <sys:String x:Key="InvalidInputTitle">输入无效</sys:String>
+    <sys:String x:Key="EStopTitle">急停</sys:String>
+    <sys:String x:Key="DataErrorTitle">数据错误</sys:String>
+    <sys:String x:Key="InfoTitle">信息</sys:String>
+    <sys:String x:Key="TestInProgressTitle">测试进行中</sys:String>
+    <sys:String x:Key="InputErrorTitle">输入错误</sys:String>
+    <sys:String x:Key="ExportSuccessfulTitle">导出成功</sys:String>
+    <sys:String x:Key="EStopResetTitle">急停重置</sys:String>
+    <sys:String x:Key="EStopSpeedTestTitle">急停（速度测试）</sys:String>
+
+    <!-- Specific Messages -->
+    <sys:String x:Key="SetHomingParametersFailed">设置归位参数失败</sys:String>
+    <sys:String x:Key="StartHomingFailed">启动归位失败</sys:String>
+    <sys:String x:Key="StopCommandIgnoredInManualMode">手动模式下忽略停止命令</sys:String>
+    <sys:String x:Key="ReadDataFailedErrorCode">读取数据失败，错误代码：{0}</sys:String>
+    <sys:String x:Key="TestOrHandwheelActive">另一个测试正在进行或手轮模式处于激活状态。请稍后再试。</sys:String>
+    <sys:String x:Key="AutoModeErrorCheckLogs">自动模式发生错误：{0}。请查看日志。</sys:String>
+    <sys:String x:Key="SensorDataEmptyNoSave">传感器数据列表为空。测试结果未保存。</sys:String>
+    <sys:String x:Key="GuideModelInvalidChars">导轨型号只能包含字母和数字</sys:String>
+    <sys:String x:Key="PreloadInvalidChars">预载只能包含字母和数字</sys:String>
+    <sys:String x:Key="SealLubricationInvalidChars">密封/润滑只能包含字母和数字</sys:String>
+    <sys:String x:Key="EStopTriggeredMain">已触发急停！请先复位急停按钮再继续。</sys:String>
+    <sys:String x:Key="HomingErrorMessageFormat">{0}：{1}</sys:String>
+    <sys:String x:Key="UnexpectedErrorMessageFormat">意外错误：{0}</sys:String>
+    <sys:String x:Key="HomingStatusTitle">归位状态：</sys:String>
+    <sys:String x:Key="PlotSavedToMessageFormat">图表已保存至：\n{0}</sys:String>
+    <sys:String x:Key="CouldNotFindPlotModelToExport">找不到要导出的图表模型。</sys:String>
+    <sys:String x:Key="EStopClearedResume">急停已清除。您现在可以恢复运动。</sys:String>
+    <sys:String x:Key="SensorClearErrorMessageFormat">清除传感器数据时发生错误：{0}</sys:String>
+    <sys:String x:Key="ClearAlarmFailedMessageFormat">清除报警失败。错误代码：{0}</sys:String>
+    <sys:String x:Key="EStopTriggeredSpeedTest">速度测试中触发急停！请复位急停按钮。</sys:String>
+    <sys:String x:Key="SpeedTestInProgress">速度测试正在进行中。</sys:String>
+    <sys:String x:Key="AnotherTestInProgress">另一个测试正在进行中。请稍候。</sys:String>
+    <sys:String x:Key="InvalidSpeedTestParameters">速度测试参数无效。请输入所有有效参数。</sys:String>
+    <sys:String x:Key="SpeedTestExecutionError">速度测试过程中发生错误。请查看日志。</sys:String>
+
+    <!-- Status Panel Keys -->
+    <sys:String x:Key="AxisStatusEmergencyStop">急停</sys:String>
+    <sys:String x:Key="AxisStatusAlarm">报警</sys:String>
+    <sys:String x:Key="AxisStatusRunning">运行中</sys:String>
+    <sys:String x:Key="AxisStatusHoming">归位中</sys:String>
+    <sys:String x:Key="AxisStatusEnabled">已启用</sys:String>
+    <sys:String x:Key="AxisStatusDisabled">已禁用</sys:String>
+    <sys:String x:Key="AxisStatusError">错误</sys:String>
+    <sys:String x:Key="EtherCatNotInitialized">未初始化</sys:String>
+    <sys:String x:Key="EtherCatInitialized">已初始化</sys:String>
+    <sys:String x:Key="EtherCatInitializing">初始化中</sys:String>
+    <sys:String x:Key="EtherCatStatusError">错误</sys:String>
+    <sys:String x:Key="SensorValueNA">无</sys:String>
+    <sys:String x:Key="SensorValueError">错误</sys:String>
+
+
 
 
 </ResourceDictionary>

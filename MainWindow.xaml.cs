@@ -27,9 +27,6 @@ namespace friction_tester
     public partial class MainWindow : Window
     {
         private TestController _testController;
-        private LineSeries _frictionSeries;
-
-        public PlotModel FrictionPlotModel { get; private set; }
         public IMotionController _motorController;
         private bool _isTestRunning = false;
         private DatabaseWindow _databaseWindow;
@@ -55,7 +52,7 @@ namespace friction_tester
                 var cleanedValue = value.Trim(); // Remove leading/trailing spaces
                 if (!Regex.IsMatch(cleanedValue, @"^[a-zA-Z0-9]*$")) // Check for invalid characters
                 {
-                    MessageBox.Show("Guide Model can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(LocalizationHelper.GetLocalizedString("GuideModelInvalidChars"), LocalizationHelper.GetLocalizedString("InvalidInputTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 _guideModel = cleanedValue; // Convert to uppercase
@@ -70,7 +67,7 @@ namespace friction_tester
                 var cleanedValue = value.Trim(); // Remove leading/trailing spaces
                 if (!Regex.IsMatch(cleanedValue, @"^[a-zA-Z0-9]*$")) // Check for invalid characters
                 {
-                    MessageBox.Show("Preload can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(LocalizationHelper.GetLocalizedString("PreloadInvalidChars"), LocalizationHelper.GetLocalizedString("InvalidInputTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 _preload = cleanedValue; // Convert to uppercase
@@ -85,7 +82,7 @@ namespace friction_tester
                 var cleanedValue = value.Trim(); // Remove leading/trailing spaces
                 if (!Regex.IsMatch(cleanedValue, @"^[a-zA-Z0-9]*$")) // Check for invalid characters
                 {
-                    MessageBox.Show("Seal Lubrication can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(LocalizationHelper.GetLocalizedString("SealLubricationInvalidChars"), LocalizationHelper.GetLocalizedString("InvalidInputTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 _sealLubrication = cleanedValue; // Convert to uppercase
@@ -95,7 +92,6 @@ namespace friction_tester
         public MainWindow()
         {
             InitializeComponent();
-            InitializePlot();
             ConfigManager.LoadConfig();
             //AppConfig config = ConfigManager.LoadConfig(); // Load settings on startup
             LanguageManager.ChangeLanguage(ConfigManager.Config.SelectedLanguage);
@@ -110,7 +106,6 @@ namespace friction_tester
             _motorController = _testController.GetMotionController();
             _motorController.HandleExternalInput(2);
             // Removed: _testController.OnDataCollected += UpdateFrictionChart;
-            _testController.OnDataCollected += UpdateFrictionChart;
             // Set MainViewModel as the DataContext for the Window
             var mainViewModel = new MainViewModel(_testController);
             DataContext = mainViewModel;
@@ -146,7 +141,7 @@ namespace friction_tester
 
                     if (!speedTestWindowShowing)
                     {
-                        MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show(LocalizationHelper.GetLocalizedString("EStopTriggeredMain"), LocalizationHelper.GetLocalizedString("EStopTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                     // If speedTestWindowShowing is true, SpeedTestWindow will handle its own E-stop message.
                 });
@@ -228,27 +223,6 @@ namespace friction_tester
             return;
         }
 
-        private void InitializePlot()
-        {
-            FrictionPlotModel = new PlotModel { Title = LocalizationHelper.GetLocalizedString("FrictionDisplacementChart") };
-            _frictionSeries = new LineSeries { Title = LocalizationHelper.GetLocalizedString("Friction"), MarkerType = MarkerType.Circle };
-            FrictionPlotModel.Series.Add(_frictionSeries);
-        }
-
-        private void UpdateFrictionChart(SensorData data)
-        {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    _frictionSeries.Points.Add(new DataPoint(data.Position, data.Friction));
-            //    FrictionPlotModel.InvalidatePlot(true);
-            //});
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _frictionSeries.Points.Add(new DataPoint(data.Position, data.SensorValue));
-                FrictionPlotModel.InvalidatePlot(true);
-            }, System.Windows.Threading.DispatcherPriority.Background);
-        }
-
         private void EmergencyStopButtonFriction_Click(object sender, RoutedEventArgs e)
         {
             _testController.StopTest();
@@ -316,7 +290,7 @@ namespace friction_tester
             {
                 Logger.LogException(ex);
                 string HomingMessage = LocalizationHelper.GetLocalizedString("HomingError");
-                MessageBox.Show($"{HomingMessage}{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("HomingErrorMessageFormat"), HomingMessage, ex.Message), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -359,13 +333,13 @@ namespace friction_tester
                 else
                 {
                     string message = LocalizationHelper.GetLocalizedString("InvalidParametersMessage");
-                    MessageBox.Show($"{message}", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(message, LocalizationHelper.GetLocalizedString("InputErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
             {
                 Logger.LogException(ex);
-                MessageBox.Show($"Unexpected error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("UnexpectedErrorMessageFormat"), ex.Message), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -456,7 +430,7 @@ namespace friction_tester
         {
             short status = 0;
             int iRes = _motorController._motionCard.GA_HomeGetSts(1, ref status);
-            MessageBox.Show("回零状态：", status.ToString());
+            MessageBox.Show(LocalizationHelper.GetLocalizedString("HomingStatusTitle") + status.ToString());
 
 
         }
@@ -587,7 +561,7 @@ namespace friction_tester
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             _motorController.SetOrigin(_axisNumber);
-            MessageBox.Show(LocalizationHelper.GetLocalizedString("SetOrigin"), "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(LocalizationHelper.GetLocalizedString("SetOrigin"), LocalizationHelper.GetLocalizedString("InfoTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void EndPositionInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -614,17 +588,28 @@ namespace friction_tester
                 string fileName = _testController.TestResult.TestName + ".png";
                 string fullPath = System.IO.Path.Combine(dialog.SelectedPath, fileName);
 
-                FrictionPlotModel.Background = OxyColors.White;
-                // Export the plot model to PNG using OxyPlot's exporter.
-                var exporter = new OxyPlot.Wpf.PngExporter
+                // Get the PlotModel from MainViewModel
+                PlotModel plotToExport = null;
+                if (DataContext is MainViewModel viewModel)
                 {
-                    Width = 800,
-                    Height = 600,
-                    //Background = OxyPlot.OxyColors.White
-                };
+                    plotToExport = viewModel.FrictionPlotModel;
+                }
 
-                exporter.ExportToFile(FrictionPlotModel, fullPath);
-                System.Windows.MessageBox.Show($"Plot saved to:\n{fullPath}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (plotToExport != null)
+                {
+                    plotToExport.Background = OxyColors.White; // Set background for export
+                    var exporter = new OxyPlot.Wpf.PngExporter
+                    {
+                        Width = 800,
+                        Height = 600,
+                    };
+                    exporter.ExportToFile(plotToExport, fullPath);
+                    System.Windows.MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("PlotSavedToMessageFormat"), fullPath), LocalizationHelper.GetLocalizedString("ExportSuccessfulTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show(LocalizationHelper.GetLocalizedString("CouldNotFindPlotModelToExport"), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -632,7 +617,7 @@ namespace friction_tester
         {
             _motorController.ResetEStop();
             // re-enable jog buttons (or other UI)
-            MessageBox.Show("E-stop cleared. You may now resume motion.", "E-stop Reset", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(LocalizationHelper.GetLocalizedString("EStopClearedResume"), LocalizationHelper.GetLocalizedString("EStopResetTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void JogP_Click(object sender, RoutedEventArgs e)
@@ -654,7 +639,7 @@ namespace friction_tester
             catch (Exception ex)
             {
                 Logger.LogException(ex);
-                MessageBox.Show($"Error when clearing sensor data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("SensorClearErrorMessageFormat"), ex.Message), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -670,7 +655,7 @@ namespace friction_tester
             int result = _motorController._motionCard.GA_ClrSts(1, 1);
             if (result != 0)
             {
-                MessageBox.Show($"Failed to clear alarm. Error code: {result}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("ClearAlarmFailedMessageFormat"), result), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
             else
             {

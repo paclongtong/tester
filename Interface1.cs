@@ -32,8 +32,13 @@ namespace friction_tester
         void EndJoystickMode(short axisNum);
         void StartEStopMonitor();
 
-        void ResetEStop();
+        Task ResetEStop();
         event Action OnEStopTriggered;
+
+        Task ClearAxisAlarmAsync();
+        Task ResetAxisAfterEStopAsync();
+        bool IsAxisInAlarm();
+
 
     }
 
