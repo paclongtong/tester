@@ -15,8 +15,10 @@ namespace friction_tester
         public event Action<SensorData> OnDataCollected;
 
         internal IMotionController _motorController;
-        private DataAcquisition _dataAcquisition;
+        public DataAcquisition _dataAcquisition;
         private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource _moveCancellationTokenSource;
+        private SensorData _lastSensorDataSent; // Field to store the last sent data
 
         private readonly TestResultsRepository _repository;
         public event Action OnTestStarted;
@@ -29,7 +31,18 @@ namespace friction_tester
             _dataAcquisition = new DataAcquisition(isSimulationMode, _motorController);
             _dataAcquisition.OnDataCollected += (data) =>
             {
-                OnDataCollected?.Invoke(data);
+                // Check if the new data is different from the last one sent
+                // This simple check assumes Timestamp is granular enough or Position/SensorValue changes are significant.
+                // For more robustness, you might need a more sophisticated comparison if timestamps are too close for identical data.
+                if (_lastSensorDataSent == null || 
+                    data.Timestamp != _lastSensorDataSent.Timestamp || 
+                    data.Position != _lastSensorDataSent.Position || 
+                    data.SensorValue != _lastSensorDataSent.SensorValue)
+                {
+                    OnDataCollected?.Invoke(data);
+                    _lastSensorDataSent = data; // Update the last sent data
+                }
+                // Else, data is considered a duplicate of the last one, so we don't re-invoke.
             };
             _cancellationTokenSource = new CancellationTokenSource();
             _repository = new TestResultsRepository();
@@ -37,26 +50,30 @@ namespace friction_tester
 
         public async Task StartAutomaticTest(double speed, double acceleration, double x1, double x2, string workpieceName)
         {
-            if (_motorController.IsHandwheelMode)
+            if (TestStateManager.IsTestInProgress && _motorController.IsHandwheelMode)
             {
-                Logger.Log("Automatic test start blocked: Handwheel mode is active.");
-                MessageBox.Show("自动测试开始被阻止：手轮模式已激活，请先关闭手轮模式 | Disable Handwheel first");
+                Logger.Log("Automatic test start blocked: Another test is in progress or Handwheel mode is active.");
+                MessageBox.Show(LocalizationHelper.GetLocalizedString("TestOrHandwheelActive"));
                 return;
             }
 
-            OnTestStarted?.Invoke(); // Notify UI that test is starting
+            TestStateManager.NotifyTestStarted();
+            OnTestStarted?.Invoke();
 
             var testName = $"{workpieceName}_{DateTime.Now:yyyyMMddHHmmss}";
 
+            _moveCancellationTokenSource = new CancellationTokenSource();
             try
             {
                 Logger.Log($"Moving to start position: {x1}mm");
-                await _motorController.MoveToPositionAsync(x1 * 1000, (int)speed, acceleration); // question
+                await _motorController.MoveToPositionAsync(x1 * 1000, (int)speed, acceleration, _moveCancellationTokenSource.Token); // question
                 _motorController.HandleExternalInput(1);
                 Logger.Log($"Moving to end position: {x2}mm with data collection");
-                var moveTask = _motorController.MoveToPositionAsync(x2 * 1000, (int)speed, acceleration);
+                var moveTask = _motorController.MoveToPositionAsync(x2 * 1000, (int)speed, acceleration, _moveCancellationTokenSource.Token);
                 while (!_motorController.IsMovementDone())
                 {
+                    if (_moveCancellationTokenSource.Token.IsCancellationRequested)
+                        break;
                     double position = _motorController.GetCurrentPosition() / 1000;
                     SensorData data = null;
                     try
@@ -82,41 +99,63 @@ namespace friction_tester
             }
             catch (Exception ex)
             {
-                MessageBox.Show("自动模式运行时出错，请检查日志 Error occurred, please check logs", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("AutoModeErrorCheckLogs"), ex.Message), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 Logger.LogException(ex);
-                //OnTestCompleted?.Invoke();
                 throw; // Rethrow the exception to be handled by the caller
             }
             finally
             {
+                _moveCancellationTokenSource?.Dispose();
+                _moveCancellationTokenSource = null;
                 OnTestCompleted?.Invoke();
+                TestStateManager.NotifyTestCompleted();
             }
 
         }
 
-        public Task ResetPosition()
+        public async Task ResetPosition()
         {
-            return Task.Run(async () =>
+            Logger.Log("[TestController] ResetPosition called.");
+            _motorController.HandleExternalInput(2); // Light Green
+            try
             {
-
-                _motorController.HandleExternalInput(2);
-
-                double speed = ConfigManager.Config.Axes[0].HomeReturnSpeed;
-                double acceleration = 20;
-                _motorController.HandleExternalInput(1);
-                _motorController.MoveToPosition(0, (int)speed, acceleration);
-                //_motorController.HomeAxis(); // HomeAxis() needs a origin sensor to function, otherwise, use usual movement function to realize homing
-                while (_motorController.IsMovementDone())
+                // Check if we need to reset axis after emergency stop
+                var realController = _motorController as RealMotionController;
+                if (realController != null)
                 {
-                    await Task.Delay(50, _cancellationTokenSource.Token);
+                    // Check if axis is in alarm state or disabled
+                    if (realController.IsAxisInAlarm())
+                    {
+                        Logger.Log("[TestController] Axis appears to be in alarm state, resetting...");
+                        await realController.ResetAxisAfterEStopAsync();
+                    }
                 }
 
-                _motorController.HandleExternalInput(2);
-            }, _cancellationTokenSource.Token);
+                Logger.Log("[TestController] ResetPosition: Attempted to clear axis alarm.");
+
+                double speed = ConfigManager.Config.Axes[0].HomeReturnSpeed;
+                double acceleration = 20; // Default acceleration for reset
+                Logger.Log($"[TestController] ResetPosition: Speed={speed}, Acceleration={acceleration}. Moving to position 0.");
+
+                _motorController.HandleExternalInput(1); // Light Yellow
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60))) // 60 second timeout
+                {
+                    await _motorController.MoveToPositionAsync(0, 50, 1000, cts.Token);
+                }
+                Logger.Log("[TestController] ResetPosition: MoveToPositionAsync(0) completed.");
+                _motorController.HandleExternalInput(2); // Light Green
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+                _motorController.HandleExternalInput(0);
+                throw;
+            }
+
         }
         public Task StopTestAsync()
         {
-            // offload to background so we don’t block UI thread
+            // offload to background so we don't block UI thread
             return Task.Run(() => StopTest());
         }
         public void StopTest()
@@ -129,6 +168,7 @@ namespace friction_tester
                     _cancellationTokenSource.Dispose();
                     _cancellationTokenSource = new CancellationTokenSource();
                 }
+                _moveCancellationTokenSource?.Cancel();
                 _motorController.Stop();
                 _motorController.HandleExternalInput(2);
                 _dataAcquisition.ClearBuffer();
@@ -160,7 +200,7 @@ namespace friction_tester
             if (sensorDataList == null || !sensorDataList.Any())
             {
                 Logger.Log("Sensor data list is empty. Aborting test result storage.");
-                MessageBox.Show("Sensor data list is empty. Test result not saved.", "Data Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(LocalizationHelper.GetLocalizedString("SensorDataEmptyNoSave"), LocalizationHelper.GetLocalizedString("DataErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -203,7 +243,7 @@ namespace friction_tester
             if (sensorDataList == null || !sensorDataList.Any())
             {
                 Logger.Log("Sensor data list is empty. Aborting test result storage.");
-                MessageBox.Show("Sensor data list is empty. Test result not saved.", "Data Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(LocalizationHelper.GetLocalizedString("SensorDataEmptyNoSave"), LocalizationHelper.GetLocalizedString("DataErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

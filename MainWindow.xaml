@@ -61,6 +61,7 @@
                     <RowDefinition Height="*" MinHeight="40"/>
                     <RowDefinition Height="Auto"/>
                     <!-- row 9: reset estop -->
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- 0: Guide Model -->
@@ -71,6 +72,7 @@
                     <TextBox x:Name="GuideModelInput"
                  Text="test35"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -82,6 +84,7 @@
                     <TextBox x:Name="PreloadInput"
                  Text="test2"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -93,6 +96,7 @@
                     <TextBox x:Name="SealLubricationInput"
                  Text="test3"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -104,6 +108,7 @@
                     <TextBox x:Name="SpeedInputFriction"
                  Text="50"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -113,8 +118,9 @@
                    FontWeight="Bold" FontSize="16"
                    Margin="0,5,0,0"/>
                     <TextBox x:Name="AccelerationInputFriction"
-                 Text="1"
+                 Text="1000"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -126,6 +132,7 @@
                     <TextBox x:Name="StartPositionInput"
                  Text="0"
                  FontSize="16" Height="30"
+                             VerticalContentAlignment="Center"
                  Margin="0,5,0,10"/>
                 </StackPanel>
 
@@ -137,6 +144,7 @@
                     <TextBox x:Name="EndPositionInput"
                  Text="200"
                  FontSize="16" Height="30"
+                    VerticalContentAlignment="Center"
                  Margin="0,5,0,10"
                  TextChanged="EndPositionInput_TextChanged"/>
                 </StackPanel>
@@ -186,6 +194,15 @@
                 <StackPanel Grid.Row="9"
                 Orientation="Horizontal"
                 HorizontalAlignment="Center"
+                VerticalAlignment="Center" Margin="0,0,0,20">
+                    <Button x:Name="SensorReset" Width="170"
+                Content="{DynamicResource SensorReset}"
+                Click="SensorClear_Click"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Row="10"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
                 VerticalAlignment="Center">
                     <Button x:Name="ResetEstop" Width="170"
                 Content="{DynamicResource ResetEStop}"
@@ -224,7 +241,88 @@
                 Margin="50"
                 Click="Button_Click"/>
                 </StackPanel>
+                <!-- ======================== -->
+                <!-- New Status Panel below the Chart and above all bottom buttons -->
+                <!-- ======================== -->
+                <StackPanel DockPanel.Dock="Bottom"
+            x:Name="StatusDisplayPanel"
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            Background="#E0E0E0"
+            Height="30"
+            Margin="0,10,0,0">
 
+                    <!-- Axis Status -->
+                    <StackPanel Orientation="Horizontal" Margin="20,0">
+                        <TextBlock Text="{DynamicResource AxisStatusLabel}" 
+                   FontSize="14" 
+                   VerticalAlignment="Center"/>
+                        <TextBlock Text=": " 
+                   FontSize="14" 
+                   VerticalAlignment="Center"/>
+                        <TextBlock FontSize="14" 
+                   VerticalAlignment="Center">
+                            <TextBlock.Text>
+                                <Binding Path="AxisStatusText" Converter="{StaticResource LocalizationConverter}"/>
+                            </TextBlock.Text>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="DarkRed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAxisEnabled}" Value="True">
+                                            <Setter Property="Foreground" Value="DarkGreen"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- EtherCAT Status -->
+                    <StackPanel Orientation="Horizontal" Margin="20,0">
+                        <TextBlock Text="{DynamicResource EtherCATLabel}" 
+                   FontSize="14" 
+                   VerticalAlignment="Center"/>
+                        <TextBlock Text=": " 
+                   FontSize="14" 
+                   VerticalAlignment="Center"/>
+                        <TextBlock FontSize="14" 
+                   VerticalAlignment="Center">
+                            <TextBlock.Text>
+                                <Binding Path="EtherCatStatusText" Converter="{StaticResource LocalizationConverter}"/>
+                            </TextBlock.Text>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="DarkRed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEtherCatInitialized}" Value="True">
+                                            <Setter Property="Foreground" Value="DarkGreen"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Sensor Value -->
+                    <StackPanel Orientation="Horizontal" Margin="20,0">
+                        <TextBlock Text="{DynamicResource SensorValueLabel}" 
+                   FontSize="14" 
+                   VerticalAlignment="Center"/>
+                        <TextBlock Text=": " 
+                   FontSize="14" 
+                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding SensorValueText}" 
+                   Foreground="DarkGreen" 
+                   FontSize="14" 
+                   VerticalAlignment="Center"/>
+                        <TextBlock Text=" N" 
+                   Foreground="DarkGreen" 
+                   FontSize="14" 
+                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                </StackPanel>
                 <!-- Handwheel / Define Origin / Print Result docked just above that -->
                 <StackPanel DockPanel.Dock="Bottom"
                 Orientation="Horizontal"
@@ -235,9 +333,14 @@
                 Width="150" Height="40"
                 Margin="10,0,0,0"
                 Click="HandWheelButton_Click"/>
+                    <Button x:Name="ClearAlarmButton"
+                Content="{DynamicResource ClearAlarm}"
+                Width="150" Height="40"
+                Margin="10,0,0,0"
+                Click="ClearAlarmButton_Click"/>
                     <Button Content="{DynamicResource DefineOrigin}"
                 Width="200" Height="40"
-                Margin="20"
+                Margin="10,0,0,0"
                 Click="Button_Click_2"/>
                     <Button x:Name="PrintResultButton"
                 Content="{DynamicResource PrintResult}"

@@ -48,9 +48,12 @@ namespace friction_tester
             _testController = testController;
             _testController.OnDataCollected += data =>
             {
+                Logger.Log($"[MainViewModel] OnDataCollected received data. Position: {data.Position}, SensorValue: {data.SensorValue}"); // DIAGNOSTIC LOG
                 lock (_bufferedPoints)
                 {
                     _bufferedPoints.Add(new DataPoint(data.Position, data.SensorValue));
+
+                    Logger.Log($"[MainViewModel] Buffer now contains {_bufferedPoints.Count} points. Latest position: {data.Position}");
                 }
             };
             InitializePlot();
@@ -96,29 +99,55 @@ namespace friction_tester
             FrictionPlotModel.Series.Add(lineSeries);
         }
 
+        private const int MaxPointsPerUpdate = 200; // Max points to process in one UI update cycle
+
         private void UpdateGraph()
         {
+            List<DataPoint> pointsToAdd = null; // Initialize to null
+            bool hasPointsToProcess = false;
+            // The plotNeedsReset logic and individual currentX/Y Min/Max are less critical if axes are always recalculated from the full series.
+
             lock (_bufferedPoints) // Ensure thread-safety for shared data access
             {
-                if (_bufferedPoints.Count == 0) return; // Exit if no new data points
+                if (_bufferedPoints.Count > 0) 
+                {
+                    hasPointsToProcess = true;
+                    int count = Math.Min(_bufferedPoints.Count, MaxPointsPerUpdate);
+                    pointsToAdd = new List<DataPoint>(_bufferedPoints.GetRange(0, count)); // Assign here
+                    _bufferedPoints.RemoveRange(0, count);
+                }
+                // If _bufferedPoints.Count is 0, hasPointsToProcess remains false, and pointsToAdd remains null.
+            }
 
-                // Dispatcher is used to update the UI thread safely
+            if (hasPointsToProcess) // This check implies pointsToAdd is not null due to the logic above
+            {
+                // Dispatch only the UI update part
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // Add buffered points to the series in the FrictionPlotModel
                     if (FrictionPlotModel.Series.Count > 0 && FrictionPlotModel.Series[0] is LineSeries lineSeries)
                     {
-                        lineSeries.Points.AddRange(_bufferedPoints);
+                        lineSeries.Points.AddRange(pointsToAdd); // Now safe to use pointsToAdd
 
-                        // Adjust Y-axis dynamically with smoother scaling
-                        var yMin = lineSeries.Points.Min(p => p.Y);
-                        var yMax = lineSeries.Points.Max(p => p.Y);
-                        var range = yMax - yMin;
-                        var margin = Math.Max(range * 0.2, 0.1); // Ensure a minimum margin
-                        FrictionPlotModel.Axes[1].Minimum = yMin - margin;
-                        FrictionPlotModel.Axes[1].Maximum = yMax + margin;
+                        // If there are any points in the series, update axes
+                        if (lineSeries.Points.Count > 0)
+                        {
+                            // More robust axis update: consider all points in the series
+                            var overallXMin = lineSeries.Points.Min(p => p.X);
+                            var overallXMax = lineSeries.Points.Max(p => p.X);
+                            var overallYMin = lineSeries.Points.Min(p => p.Y);
+                            var overallYMax = lineSeries.Points.Max(p => p.Y);
 
-                        _bufferedPoints.Clear(); // Clear the buffer after processing
+                            var xRange = overallXMax - overallXMin;
+                            var xMargin = Math.Max(xRange * 0.05, 1.0); // Min margin 1mm
+                            FrictionPlotModel.Axes[0].Minimum = overallXMin - xMargin;
+                            FrictionPlotModel.Axes[0].Maximum = overallXMax + xMargin;
+
+                            var yRange = overallYMax - overallYMin;
+                            var yMargin = Math.Max(yRange * 0.2, 0.1); // Min margin 0.1N
+                            FrictionPlotModel.Axes[1].Minimum = overallYMin - yMargin;
+                            FrictionPlotModel.Axes[1].Maximum = overallYMax + yMargin;
+                        }
+                        // else block for plotNeedsReset can be removed if Reset() handles axis reset properly
                         FrictionPlotModel.InvalidatePlot(true); // Refresh the plot
                     }
                 }, System.Windows.Threading.DispatcherPriority.Background);
@@ -148,11 +177,11 @@ namespace friction_tester
             }
 
             // Move the testing head back to the origin (assuming origin is 0.0)
-            if (_testController != null)
-            {
-                //_testController.StopTest(); // Stop any ongoing test
-                _testController.ResetPosition(); // Command to move to position 0
-            }
+            //if (_testController != null)
+            //{
+            //    //_testController.StopTest(); // Stop any ongoing test
+            //    //_testController.ResetPosition(); // Command to move to position 0
+            //}
         }
 
         protected void OnPropertyChanged(string name)

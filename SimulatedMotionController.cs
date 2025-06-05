@@ -76,7 +76,7 @@ public class SimulatedMotionController : IMotionController
     public void HandleExternalInput(int inputCode)
     { return; }
 
-    public Task MoveToPositionAsync(double position, int maxVelocity, double acceleration)
+    public Task MoveToPositionAsync(double position, int maxVelocity, double acceleration, CancellationToken cancellationToken = default)
     {
         MoveToPosition(position, maxVelocity, acceleration);
         return Task.CompletedTask;
@@ -93,6 +93,12 @@ public class SimulatedMotionController : IMotionController
 
     public void StartEStopMonitor() { return; } // Simulated controller does not support E-Stop monitoring
 
-    public void ResetEStop() { return; } // Simulated controller does not support E-Stop reset
+    public Task ResetEStop() { return Task.CompletedTask; } // Simulated controller does not support E-Stop reset
+
+    public async Task ClearAxisAlarmAsync() { return; } // Simulated controller does not support clearing alarms
+
+    public async Task ResetAxisAfterEStopAsync() {  return; }
+
+    public bool IsAxisInAlarm() { return false; } // Simulated controller does not support axis alarms
 }
 

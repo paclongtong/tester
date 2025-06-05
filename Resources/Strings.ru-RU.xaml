@@ -14,14 +14,14 @@
     <sys:String x:Key="SaveSettings">Сохранить настройки</sys:String>
     <sys:String x:Key="FrictionTest">Тест на трение</sys:String>
     <sys:String x:Key="SpeedTest">Тест скорости</sys:String>
-    <sys:String x:Key="DefineOrigin">Определить начальную точку (не нажимайте, если не меняете)</sys:String>
+    <sys:String x:Key="DefineOrigin">Задать ноль</sys:String>
     <sys:String x:Key="Velocity">Скорость (мм/с)</sys:String>
     <sys:String x:Key="Acceleration">Ускорение (мм/с²)</sys:String>
     <sys:String x:Key="Start">Начало (мм)</sys:String>
     <sys:String x:Key="End">Конец (мм)</sys:String>
-    <sys:String x:Key="StartAutoTest">Запуск автоматического теста</sys:String>
+    <sys:String x:Key="StartAutoTest">Начать тест</sys:String>
     <sys:String x:Key="Stop">Остановить</sys:String>
-    <sys:String x:Key="ResetOrigin">Сброс и возврат на начальную точку</sys:String>
+    <sys:String x:Key="ResetOrigin">Сброс и домой</sys:String>
     <sys:String x:Key="JogP">Джог +</sys:String>
     <sys:String x:Key="JogN">Джог -</sys:String>
     <sys:String x:Key="HandwheelOpen">Ручное колесо: Включено</sys:String>
@@ -40,7 +40,7 @@
     <sys:String x:Key="Friction">Трение</sys:String>
     <sys:String x:Key="TestDuration">Продолжительность теста</sys:String>
     <sys:String x:Key="PrintResult">Распечатать результат</sys:String>
-    <sys:String x:Key="Repetition">Повторения</sys:String>
+    <sys:String x:Key="Repetitions">Повторения</sys:String>
     <sys:String x:Key="StartTest">Начать тестирование</sys:String>
     <sys:String x:Key="DeleteSelected">Удалить выбранное</sys:String>
     <sys:String x:Key="DisplayResult">Отобразить результат</sys:String>
@@ -65,5 +65,84 @@
     <sys:String x:Key="JoystickOn">Джойстик: Вкл.</sys:String>
     <sys:String x:Key="JoystickOff">Джойстик: Выкл.</sys:String>
     <sys:String x:Key="SetOrigin">Переопределен источник, перезапустите приложение</sys:String>
+    <sys:String x:Key="SensorReset">Сбросить значение датчика</sys:String>
+    <sys:String x:Key="HomingErrorMessage">Произошла ошибка во время возврата в исходное положение: </sys:String>
+    <sys:String x:Key="InvalidParametersMessage">Пожалуйста, введите допустимые параметры!</sys:String>
+    <sys:String x:Key="EnableMotionCardSuccess">Карта управления движением включена.</sys:String>
+    <sys:String x:Key="EnableMotionCardFailure">Не удалось включить карту управления движением.</sys:String>
+    <sys:String x:Key="ClearAlarm">Сброс тревоги</sys:String>
+    
+    <!-- Status Labels -->
+    <sys:String x:Key="AxisStatusLabel">Статус оси</sys:String>
+    <sys:String x:Key="EtherCATLabel">EtherCAT</sys:String>
+    <sys:String x:Key="SensorValueLabel">Значение датчика</sys:String>
+
+    <!-- Axis Status Values -->
+    <sys:String x:Key="Enabled">Включен</sys:String>
+    <sys:String x:Key="Disabled">Отключен</sys:String>
+    <sys:String x:Key="Running">Работает</sys:String>
+    <sys:String x:Key="Homing">Поиск дома</sys:String>
+    <sys:String x:Key="EmergencyStop">Аварийная остановка</sys:String>
+    <sys:String x:Key="Alarm">Сигнализация привода</sys:String> 
+    <sys:String x:Key="Unknown">Неизвестно</sys:String>
+
+    <!-- EtherCAT Status Values -->
+    <sys:String x:Key="Initialized">Инициализирован</sys:String>
+    <sys:String x:Key="NotInitialized">Не инициализирован</sys:String>
+    <sys:String x:Key="Initializing">Инициализация</sys:String>
+
+    <!-- Common Titles -->
+    <sys:String x:Key="ErrorTitle">Ошибка</sys:String>
+    <sys:String x:Key="InvalidInputTitle">Неверный ввод</sys:String>
+    <sys:String x:Key="EStopTitle">Аварийная остановка</sys:String>
+    <sys:String x:Key="DataErrorTitle">Ошибка данных</sys:String>
+    <sys:String x:Key="InfoTitle">Информация</sys:String>
+    <sys:String x:Key="TestInProgressTitle">Тест выполняется</sys:String>
+    <sys:String x:Key="InputErrorTitle">Ошибка ввода</sys:String>
+    <sys:String x:Key="ExportSuccessfulTitle">Экспорт успешен</sys:String>
+    <sys:String x:Key="EStopResetTitle">Сброс аварийной остановки</sys:String>
+    <sys:String x:Key="EStopSpeedTestTitle">Аварийная остановка (тест скорости)</sys:String>
+
+    <!-- Specific Messages -->
+    <sys:String x:Key="SetHomingParametersFailed">Не удалось задать параметры возвращения.</sys:String>
+    <sys:String x:Key="StartHomingFailed">Не удалось начать возвращение.</sys:String>
+    <sys:String x:Key="StopCommandIgnoredInManualMode">Команда остановки проигнорирована в ручном режиме.</sys:String>
+    <sys:String x:Key="ReadDataFailedErrorCode">Ошибка чтения данных, код ошибки: {0}</sys:String>
+    <sys:String x:Key="TestOrHandwheelActive">Идёт другой тест или активен ручной режим. Повторите позже.</sys:String>
+    <sys:String x:Key="AutoModeErrorCheckLogs">Ошибка в автоматическом режиме: {0}. Проверьте логи.</sys:String>
+    <sys:String x:Key="SensorDataEmptyNoSave">Список данных датчика пуст. Результат не сохранён.</sys:String>
+    <sys:String x:Key="GuideModelInvalidChars">Модель направляющей может содержать только буквы и цифры.</sys:String>
+    <sys:String x:Key="PreloadInvalidChars">Преднагрузка может содержать только буквы и цифры.</sys:String>
+    <sys:String x:Key="SealLubricationInvalidChars">Уплотнение/смазка может содержать только буквы и цифры.</sys:String>
+    <sys:String x:Key="EStopTriggeredMain">Сработала аварийная остановка! Сбросьте кнопку перед продолжением.</sys:String>
+    <sys:String x:Key="HomingErrorMessageFormat">{0}: {1}</sys:String>
+    <sys:String x:Key="UnexpectedErrorMessageFormat">Неожиданная ошибка: {0}</sys:String>
+    <sys:String x:Key="HomingStatusTitle">Статус возвращения:</sys:String>
+    <sys:String x:Key="PlotSavedToMessageFormat">График сохранён в:\n{0}</sys:String>
+    <sys:String x:Key="CouldNotFindPlotModelToExport">Невозможно найти график для экспорта.</sys:String>
+    <sys:String x:Key="EStopClearedResume">Аварийная остановка сброшена. Можно продолжать движение.</sys:String>
+    <sys:String x:Key="SensorClearErrorMessageFormat">Ошибка при очистке данных датчика: {0}</sys:String>
+    <sys:String x:Key="ClearAlarmFailedMessageFormat">Не удалось сбросить тревогу. Код ошибки: {0}</sys:String>
+    <sys:String x:Key="EStopTriggeredSpeedTest">Сработала аварийная остановка во время теста скорости! Сбросьте кнопку.</sys:String>
+    <sys:String x:Key="SpeedTestInProgress">Тест скорости уже выполняется.</sys:String>
+    <sys:String x:Key="AnotherTestInProgress">Выполняется другой тест. Пожалуйста, подождите.</sys:String>
+    <sys:String x:Key="InvalidSpeedTestParameters">Неверные параметры теста скорости. Пожалуйста, введите все аргументы правильно.</sys:String>
+    <sys:String x:Key="SpeedTestExecutionError">Ошибка во время выполнения теста скорости. Проверьте логи.</sys:String>
+
+    <!-- Status Panel Keys -->
+    <sys:String x:Key="AxisStatusEmergencyStop">Аварийная остановка</sys:String>
+    <sys:String x:Key="AxisStatusAlarm">Тревога</sys:String>
+    <sys:String x:Key="AxisStatusRunning">В работе</sys:String>
+    <sys:String x:Key="AxisStatusHoming">Возврат</sys:String>
+    <sys:String x:Key="AxisStatusEnabled">Включено</sys:String>
+    <sys:String x:Key="AxisStatusDisabled">Отключено</sys:String>
+    <sys:String x:Key="AxisStatusError">Ошибка</sys:String>
+    <sys:String x:Key="EtherCatNotInitialized">Не инициализировано</sys:String>
+    <sys:String x:Key="EtherCatInitialized">Инициализировано</sys:String>
+    <sys:String x:Key="EtherCatInitializing">Инициализация</sys:String>
+    <sys:String x:Key="EtherCatStatusError">Ошибка</sys:String>
+    <sys:String x:Key="SensorValueNA">Н/Д</sys:String>
+    <sys:String x:Key="SensorValueError">Ошибка</sys:String>
+
 
 </ResourceDictionary>

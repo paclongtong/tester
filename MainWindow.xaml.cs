@@ -19,6 +19,7 @@ using MultiCardCS;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using OxyPlot.Wpf;
+using System.Linq;
 
 namespace friction_tester
 {
@@ -26,9 +27,6 @@ namespace friction_tester
     public partial class MainWindow : Window
     {
         private TestController _testController;
-        private LineSeries _frictionSeries;
-
-        public PlotModel FrictionPlotModel { get; private set; }
         public IMotionController _motorController;
         private bool _isTestRunning = false;
         private DatabaseWindow _databaseWindow;
@@ -44,6 +42,8 @@ namespace friction_tester
         private string _preload;
         private string _sealLubrication;
 
+        private StatusPanelViewModel _statusPanelViewModel;
+
         public string GuideModel
         {
             get => _guideModel;
@@ -52,10 +52,10 @@ namespace friction_tester
                 var cleanedValue = value.Trim(); // Remove leading/trailing spaces
                 if (!Regex.IsMatch(cleanedValue, @"^[a-zA-Z0-9]*$")) // Check for invalid characters
                 {
-                    MessageBox.Show("Guide Model can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(LocalizationHelper.GetLocalizedString("GuideModelInvalidChars"), LocalizationHelper.GetLocalizedString("InvalidInputTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                _guideModel = cleanedValue.ToUpper(); // Convert to uppercase
+                _guideModel = cleanedValue; // Convert to uppercase
             }
         }
 
@@ -67,10 +67,10 @@ namespace friction_tester
                 var cleanedValue = value.Trim(); // Remove leading/trailing spaces
                 if (!Regex.IsMatch(cleanedValue, @"^[a-zA-Z0-9]*$")) // Check for invalid characters
                 {
-                    MessageBox.Show("Preload can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(LocalizationHelper.GetLocalizedString("PreloadInvalidChars"), LocalizationHelper.GetLocalizedString("InvalidInputTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                _preload = cleanedValue.ToUpper(); // Convert to uppercase
+                _preload = cleanedValue; // Convert to uppercase
             }
         }
 
@@ -82,21 +82,17 @@ namespace friction_tester
                 var cleanedValue = value.Trim(); // Remove leading/trailing spaces
                 if (!Regex.IsMatch(cleanedValue, @"^[a-zA-Z0-9]*$")) // Check for invalid characters
                 {
-                    MessageBox.Show("Seal Lubrication can only contain letters and numbers.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(LocalizationHelper.GetLocalizedString("SealLubricationInvalidChars"), LocalizationHelper.GetLocalizedString("InvalidInputTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                _sealLubrication = cleanedValue.ToUpper(); // Convert to uppercase
+                _sealLubrication = cleanedValue; // Convert to uppercase
             }
         }
 
         public MainWindow()
         {
             InitializeComponent();
-            InitializePlot();
-
-            _isHandwheelOn = true;
-            //HandwheelButton.Content = "手轮模式：关";
-
+            ConfigManager.LoadConfig();
             //AppConfig config = ConfigManager.LoadConfig(); // Load settings on startup
             LanguageManager.ChangeLanguage(ConfigManager.Config.SelectedLanguage);
             //ApplyConfig(config); // Apply settings to UI
@@ -109,11 +105,15 @@ namespace friction_tester
             _testController = new TestController(isSimulationMode: _isSimulation);       // Set the simulation mode True if Motion Control Card is missing
             _motorController = _testController.GetMotionController();
             _motorController.HandleExternalInput(2);
-            _testController.OnDataCollected += UpdateFrictionChart;
-            DataContext = new MainViewModel(_testController);
+            // Removed: _testController.OnDataCollected += UpdateFrictionChart;
+            // Set MainViewModel as the DataContext for the Window
+            var mainViewModel = new MainViewModel(_testController);
+            DataContext = mainViewModel;
+
+            // Removed: InitializePlot(); // MainViewModel now handles this
 
             LoadConfigOnStartup();
-
+            InitializeStatusPanel();
             _testController.OnTestStarted += () =>
             {
                 _isTestRunning = true;
@@ -132,14 +132,31 @@ namespace friction_tester
                 });
             };
 
-            //_motorController.OnEStopTriggered += () =>
-            //{
-            //    Dispatcher.Invoke(() =>
-            //    {
-            //        MessageBox.Show("Emergency stop triggered! Please reset the E-stop button before resuming.", "E-stop", MessageBoxButton.OK, MessageBoxImage.Warning);
-            //    });
-            //};
+            _motorController.OnEStopTriggered += () =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    // Check if SpeedTestWindow is active and visible
+                    bool speedTestWindowShowing = Application.Current.Windows.OfType<SpeedTestWindow>().Any(win => win.IsVisible);
 
+                    if (!speedTestWindowShowing)
+                    {
+                        MessageBox.Show(LocalizationHelper.GetLocalizedString("EStopTriggeredMain"), LocalizationHelper.GetLocalizedString("EStopTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                    // If speedTestWindowShowing is true, SpeedTestWindow will handle its own E-stop message.
+                });
+            };
+
+        }
+
+        private void InitializeStatusPanel()
+        {
+            // Initialize the status panel ViewModel
+            _statusPanelViewModel = new StatusPanelViewModel(_testController);
+
+            // Set the DataContext for the status panel UI element
+            StatusDisplayPanel.DataContext = _statusPanelViewModel;
+            // Removed: this.DataContext = _statusPanelViewModel; // This was overriding the MainViewModel
         }
 
         private void LoadConfigOnStartup()
@@ -158,8 +175,8 @@ namespace friction_tester
                     {
                         // Apply soft limits (values are already in pulses from configuration)
                         int result = _motorController._motionCard.GA_SetSoftLimit(_axisNumber,
-                            (int)config.Axes[0].SoftLimitMax,
-                            (int)config.Axes[0].SoftLimitMin);
+                            (int)(config.Axes[0].SoftLimitMax * 1000),
+                            (int)(config.Axes[0].SoftLimitMin * 1000));
 
                         if (result != 0)
                         {
@@ -174,6 +191,7 @@ namespace friction_tester
                             // Using origin signal as hard limit (second parameter = 0)
                             // Using main card (third parameter = 0)
                             // IO index 7 (fourth parameter = 7)
+                            _motorController._motionCard.GA_LmtsOn(_axisNumber, -1); // Enable hard limits
                             result = _motorController._motionCard.GA_SetHardLimP(_axisNumber, 0, 0, 7);
 
                             if (result != 0)
@@ -185,12 +203,13 @@ namespace friction_tester
                         {
                             // Disable hard limits by setting soft limits to maximum range
                             // This effectively disables hard limit functionality
-                            result = _motorController._motionCard.GA_SetSoftLimit(_axisNumber, 2147483647, -2147483648);
+                            //result = _motorController._motionCard.GA_SetSoftLimit(_axisNumber, 2147483647, -2147483648);
+                            //result = _motorController._motionCard.GA_LmtsOff(_axisNumber, -1);
 
-                            if (result != 0)
-                            {
-                                Console.WriteLine($"Failed to disable hard limits. Error code: {result}");
-                            }
+                            //if (result != 0)
+                            //{
+                            //    Console.WriteLine($"Failed to disable hard limits. Error code: {result}");
+                            //}
                         }
                     }
                     catch (Exception ex)
@@ -204,27 +223,6 @@ namespace friction_tester
             return;
         }
 
-        private void InitializePlot()
-        {
-            FrictionPlotModel = new PlotModel { Title = LocalizationHelper.GetLocalizedString("FrictionDisplacementChart") };
-            _frictionSeries = new LineSeries { Title = LocalizationHelper.GetLocalizedString("Friction"), MarkerType = MarkerType.Circle };
-            FrictionPlotModel.Series.Add(_frictionSeries);
-        }
-
-        private void UpdateFrictionChart(SensorData data)
-        {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    _frictionSeries.Points.Add(new DataPoint(data.Position, data.Friction));
-            //    FrictionPlotModel.InvalidatePlot(true);
-            //});
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _frictionSeries.Points.Add(new DataPoint(data.Position, data.SensorValue));
-                FrictionPlotModel.InvalidatePlot(true);
-            }, System.Windows.Threading.DispatcherPriority.Background);
-        }
-
         private void EmergencyStopButtonFriction_Click(object sender, RoutedEventArgs e)
         {
             _testController.StopTest();
@@ -232,7 +230,7 @@ namespace friction_tester
 
         private void FrictionTestButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("此为当前界面", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            //MessageBox.Show("此为当前界面", "温馨提示", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
 
@@ -291,7 +289,8 @@ namespace friction_tester
             catch (Exception ex)
             {
                 Logger.LogException(ex);
-                MessageBox.Show($"回零过程中出错：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                string HomingMessage = LocalizationHelper.GetLocalizedString("HomingError");
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("HomingErrorMessageFormat"), HomingMessage, ex.Message), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -324,8 +323,8 @@ namespace friction_tester
                     double.TryParse(EndPositionInput.Text, out double x2))
                 {
                     Logger.Log($"Starting test with speed={speed}, acceleration={acceleration}, x1={x1}, x2={x2}");
-                    _frictionSeries.Points.Clear();
-                    FrictionPlotModel.InvalidatePlot(true);
+                    // _frictionSeries.Points.Clear();
+                    // FrictionPlotModel.InvalidatePlot(true);
 
                     await _testController.StartAutomaticTest(speed, acceleration, x1, x2, workpieceName);
 
@@ -333,13 +332,14 @@ namespace friction_tester
                 }
                 else
                 {
-                    MessageBox.Show("请输入有效的参数！", "输入错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    string message = LocalizationHelper.GetLocalizedString("InvalidParametersMessage");
+                    MessageBox.Show(message, LocalizationHelper.GetLocalizedString("InputErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
             {
                 Logger.LogException(ex);
-                MessageBox.Show($"Unexpected error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("UnexpectedErrorMessageFormat"), ex.Message), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -430,7 +430,7 @@ namespace friction_tester
         {
             short status = 0;
             int iRes = _motorController._motionCard.GA_HomeGetSts(1, ref status);
-            MessageBox.Show("回零状态：", status.ToString());
+            MessageBox.Show(LocalizationHelper.GetLocalizedString("HomingStatusTitle") + status.ToString());
 
 
         }
@@ -561,7 +561,7 @@ namespace friction_tester
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             _motorController.SetOrigin(_axisNumber);
-            MessageBox.Show(LocalizationHelper.GetLocalizedString("SetOrigin"), "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(LocalizationHelper.GetLocalizedString("SetOrigin"), LocalizationHelper.GetLocalizedString("InfoTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void EndPositionInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -588,17 +588,28 @@ namespace friction_tester
                 string fileName = _testController.TestResult.TestName + ".png";
                 string fullPath = System.IO.Path.Combine(dialog.SelectedPath, fileName);
 
-                FrictionPlotModel.Background = OxyColors.White;
-                // Export the plot model to PNG using OxyPlot's exporter.
-                var exporter = new OxyPlot.Wpf.PngExporter
+                // Get the PlotModel from MainViewModel
+                PlotModel plotToExport = null;
+                if (DataContext is MainViewModel viewModel)
                 {
-                    Width = 800,
-                    Height = 600,
-                    //Background = OxyPlot.OxyColors.White
-                };
+                    plotToExport = viewModel.FrictionPlotModel;
+                }
 
-                exporter.ExportToFile(FrictionPlotModel, fullPath);
-                System.Windows.MessageBox.Show($"Plot saved to:\n{fullPath}", "Export Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (plotToExport != null)
+                {
+                    plotToExport.Background = OxyColors.White; // Set background for export
+                    var exporter = new OxyPlot.Wpf.PngExporter
+                    {
+                        Width = 800,
+                        Height = 600,
+                    };
+                    exporter.ExportToFile(plotToExport, fullPath);
+                    System.Windows.MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("PlotSavedToMessageFormat"), fullPath), LocalizationHelper.GetLocalizedString("ExportSuccessfulTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show(LocalizationHelper.GetLocalizedString("CouldNotFindPlotModelToExport"), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -606,7 +617,7 @@ namespace friction_tester
         {
             _motorController.ResetEStop();
             // re-enable jog buttons (or other UI)
-            MessageBox.Show("E-stop cleared. You may now resume motion.", "E-stop Reset", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(LocalizationHelper.GetLocalizedString("EStopClearedResume"), LocalizationHelper.GetLocalizedString("EStopResetTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void JogP_Click(object sender, RoutedEventArgs e)
@@ -617,6 +628,39 @@ namespace friction_tester
         private void JogN_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private async void SensorClear_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await _testController._dataAcquisition.ClearCurrentWeightAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("SensorClearErrorMessageFormat"), ex.Message), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _statusPanelViewModel?.Dispose();
+            _motorController._motionCard.GA_Close(); // Close the motion card connection
+            base.OnClosed(e);
+        }
+
+        private void ClearAlarmButton_Click(object sender, RoutedEventArgs e)
+        {
+            int result = _motorController._motionCard.GA_ClrSts(1, 1);
+            if (result != 0)
+            {
+                MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("ClearAlarmFailedMessageFormat"), result), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                Logger.Log("Alarm cleared.");
+            }
         }
     }
 }

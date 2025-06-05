@@ -14,9 +14,9 @@ public class AxisConfig
         {
             if ( double.TryParse(value.ToString().Trim(), out double parsedValue))
             {
-                if (parsedValue < 0)
+                if (parsedValue < -1000000)
                 {
-                    throw new ArgumentOutOfRangeException("Soft limit min cannot be negative");
+                    throw new ArgumentOutOfRangeException("Soft limit min cannot be too small");
                 }
                 _softLimitMin = parsedValue;
             }
@@ -31,7 +31,7 @@ public class AxisConfig
         {
                 if (double.TryParse(value.ToString().Trim(), out double parsedValue))
                 {
-                    if (parsedValue < -1000 || parsedValue > 3000000)
+                    if (parsedValue < -1000000 || parsedValue > 3000000)
                     {
                         throw new ArgumentOutOfRangeException("Soft limit max cannot be negative or too large");
                     }

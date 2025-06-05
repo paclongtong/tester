@@ -5,8 +5,14 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <local:LocalizationConverter x:Key="LocalizationConverter"/>
+            
             <ResourceDictionary.MergedDictionaries>
                 <!-- Load default language (English as default) -->
+                <ResourceDictionary Source="Resources/Strings.en-US.xaml"/>
+
+                <ResourceDictionary Source="Resources/Strings.fr-FR.xaml"/>
+                <ResourceDictionary Source="Resources/Strings.ru-RU.xaml"/>
                 <ResourceDictionary Source="Resources/Strings.zh-CN.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <!-- Other global resources can go here -->

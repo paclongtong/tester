@@ -381,6 +381,80 @@ namespace friction_tester
             }
         }
 
+        /// <summary>
+        /// Sends the “clear current weight” (zero) command to the DY500:
+        ///     Send:   [Station=1][0x10][0x06][0x2A][0x00][0x02][0x04][0x00][0x00][0x00][0x01][CRClo][CRChi]
+        ///   Returns: Echo of first 6 bytes + CRC (8 bytes total).
+        /// </summary>
+        public async Task ClearCurrentWeightAsync()
+        {
+            if (_serialPort == null || !_serialPort.IsOpen)
+                throw new Exception("Serial port not available");
+
+            const ushort clearAddress = 0x062A;   // Register 0x06 2A
+            const ushort clearRegisters = 0x0002;   // Two registers (4 bytes)
+                                                    // Payload: 0x0000 0001
+            byte[] payload = new byte[] { 0x00, 0x00, 0x00, 0x01 };
+
+            // Build Modbus RTU “Write Multiple Registers” command (0x10)
+            var cmd = new List<byte>
+    {
+        _stationAddress,      // 01
+        0x10,                 // Function code 16
+        (byte)(clearAddress >> 8),
+        (byte)(clearAddress & 0xFF),
+        (byte)(clearRegisters >> 8),
+        (byte)(clearRegisters & 0xFF),
+        (byte)payload.Length  // Byte count = 4
+    };
+            cmd.AddRange(payload);
+
+            // Append CRC16 (low byte first)
+            ushort crc = CalculateCRC(cmd.ToArray());
+            cmd.Add((byte)(crc & 0xFF));
+            cmd.Add((byte)(crc >> 8));
+
+            try
+            {
+                // Clear any old data, send command
+                _serialPort.DiscardInBuffer();
+                _serialPort.Write(cmd.ToArray(), 0, cmd.Count);
+
+                // Give the DY500 a moment to respond
+                await Task.Delay(100);
+
+                // Read whatever’s in the buffer (should be 8 bytes)
+                int toRead = _serialPort.BytesToRead;
+                if (toRead == 0)
+                {
+                    await Task.Delay(100);
+                    toRead = _serialPort.BytesToRead;
+                }
+
+                if (toRead >= 8)
+                {
+                    byte[] resp = new byte[toRead];
+                    _serialPort.Read(resp, 0, resp.Length);
+
+                    // Verify CRC on the response
+                    if (!VerifyCRC(resp))
+                        throw new Exception("CRC check failed on clear-weight response");
+
+                    // Optional: verify the first 6 bytes echo your command:
+                    // resp[0]==_stationAddress, resp[1]==0x10, resp[2..5]==address/count
+                    return;
+                }
+
+                throw new Exception("No or incomplete response from DY500");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+                throw new Exception($"Failed to clear current weight: {ex.Message}");
+            }
+        }
+
+
         private ushort CalculateCRC(byte[] data)
         {
             ushort crc = 0xFFFF;

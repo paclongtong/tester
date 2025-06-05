@@ -22,7 +22,7 @@
             <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
                 <TextBlock Text="{DynamicResource SoftLimitMin}" FontWeight="Bold" VerticalAlignment="Center"/>
                 <TextBox x:Name="SoftLimitMinTextBox" Text="{Binding SoftLimitMin, ValidatesOnExceptions=True}" 
-                         Width="200" Height="30"  HorizontalAlignment="Left"
+                         Width="200" Height="30"  HorizontalAlignment="Left" VerticalContentAlignment="Center"
                          PreviewTextInput="NumericInput_PreviewTextInput"/>
             </StackPanel>
 
@@ -30,7 +30,7 @@
             <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
                 <TextBlock Text="{DynamicResource SoftLimitMax}" FontWeight="Bold" VerticalAlignment="Center"/>
                 <TextBox x:Name="SoftLimitMaxTextBox" Text="{Binding SoftLimitMax, ValidatesOnExceptions=True}" 
-                         Width="200" Height="30" HorizontalAlignment="Left"
+                         Width="200" Height="30" HorizontalAlignment="Left" VerticalContentAlignment="Center"
                          PreviewTextInput="NumericInput_PreviewTextInput"/>
             </StackPanel>
 
@@ -38,7 +38,7 @@
             <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
                 <TextBlock Text="{DynamicResource HomeReturnSpeed}" FontWeight="Bold" VerticalAlignment="Center"/>
                 <TextBox x:Name="HomeReturnSpeedTextBox" Text="{Binding HomeReturnSpeed, ValidatesOnExceptions=True}" 
-                         Width="200" Height="30" HorizontalAlignment="Left"
+                         Width="200" Height="30" HorizontalAlignment="Left" VerticalContentAlignment="Center"
                          PreviewTextInput="NumericInput_PreviewTextInput"/>
             </StackPanel>
 
