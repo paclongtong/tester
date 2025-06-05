@@ -50,7 +50,7 @@ namespace friction_tester
 
         public async Task StartAutomaticTest(double speed, double acceleration, double x1, double x2, string workpieceName)
         {
-            if (TestStateManager.IsTestInProgress && _motorController.IsHandwheelMode)
+            if (TestStateManager.IsTestInProgress || _motorController.IsJoystickMode)
             {
                 Logger.Log("Automatic test start blocked: Another test is in progress or Handwheel mode is active.");
                 MessageBox.Show(LocalizationHelper.GetLocalizedString("TestOrHandwheelActive"));
@@ -97,11 +97,18 @@ namespace friction_tester
                 Logger.Log($"Test completed successfully: {testName}");
                 _dataAcquisition.ClearBuffer();
             }
-            catch (Exception ex)
+            catch (OperationCanceledException oce) // Catch OperationCanceledException specifically
+            {
+                // This is an expected cancellation if StopTest or EStop was called.
+                Logger.Log($"Automatic test operation was cancelled: {oce.Message}");
+                // No MessageBox here for OperationCanceledException, as this is often a controlled stop.
+                // Do NOT re-throw, to prevent MainWindow from showing another error message for a controlled stop.
+            }
+            catch (Exception ex) // Catch other unexpected exceptions
             {
                 MessageBox.Show(string.Format(LocalizationHelper.GetLocalizedString("AutoModeErrorCheckLogs"), ex.Message), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 Logger.LogException(ex);
-                throw; // Rethrow the exception to be handled by the caller
+                throw; // Rethrow other unexpected exceptions to be handled by the caller (e.g., MainWindow)
             }
             finally
             {

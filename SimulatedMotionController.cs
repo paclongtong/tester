@@ -91,7 +91,8 @@ public class SimulatedMotionController : IMotionController
         return; // Simulated controller does not support joystick mode
     }
 
-    public void StartEStopMonitor() { return; } // Simulated controller does not support E-Stop monitoring
+    //public void StartEStopMonitor() { return; } // Simulated controller does not support E-Stop monitoring
+    public void StartEStopMonitorThread() { return; }
 
     public Task ResetEStop() { return Task.CompletedTask; } // Simulated controller does not support E-Stop reset
 
@@ -100,5 +101,14 @@ public class SimulatedMotionController : IMotionController
     public async Task ResetAxisAfterEStopAsync() {  return; }
 
     public bool IsAxisInAlarm() { return false; } // Simulated controller does not support axis alarms
+
+    public void EStop()
+    {
+        _cancellationTokenSource?.Cancel();
+        _isMoving = false;
+        OnEStopTriggered?.Invoke();
+    }
+
+    public bool IsJoystickMode { get; set; }
 }
 

@@ -39,6 +39,8 @@ namespace friction_tester
             // Ensure this runs on the UI thread of SpeedTestWindow
             this.Dispatcher.Invoke(() =>
             {
+                _isSpeedTestRunning = false; // Explicitly set flag to stop test execution
+
                 // Check if this window is still visible/active before showing the message
                 // to avoid issues if the event comes after the window is closing.
                 if (this.IsVisible)
@@ -75,8 +77,11 @@ namespace friction_tester
             Logger.Log($"Speed test started with Start: {startPos}, End: {endPos}, Velocity: {maxVelocity}, " +
                        $"Acceleration: {acceleration}, Repetitions: {repetitions}");
 
-            _isSpeedTestRunning = true; // Set local flag
+            bool notifiedStateManagerOfTestStart = false; // Local flag for this test instance
+
+            _isSpeedTestRunning = true; // Set local flag for UI/re-entrancy
             TestStateManager.NotifyTestStarted(); // Notify global state
+            notifiedStateManagerOfTestStart = true; // Mark that this instance notified the manager
             try
             {
                 _motionController._motionCard.GA_AxisOn(1); // Ensure the axis is powered on
@@ -88,14 +93,21 @@ namespace friction_tester
                     if (!_isSpeedTestRunning) break;
 
                     var moveTask = _motionController.MoveToPositionAsync(endPos * 1000, maxVelocity, acceleration);
-                    while (!_motionController.IsMovementDone())
+                    
+                    // Loop condition now prioritizes _isSpeedTestRunning
+                    while (_isSpeedTestRunning && !_motionController.IsMovementDone()) 
                     {
-                        if (!_isSpeedTestRunning) break;
-                        double position = _motionController.GetCurrentPosition() / 1000.0; // Convert to mm
-                        SensorData data = null;
-
+                        // This check is redundant if the while condition includes _isSpeedTestRunning but kept for safety for now.
+                        // if (!_isSpeedTestRunning) break; 
+                        
                         try
                         {
+                            // Attempt to get position and data only if still running
+                            double position = _motionController.GetCurrentPosition() / 1000.0; // Convert to mm
+                            SensorData data = null;
+
+                            // Existing try-catch for CollectDataAtPositionAsync is fine, 
+                            // this outer try-catch handles GetCurrentPosition failure specifically.
                             data = await _dataAcquisition.CollectDataAtPositionAsync(position);
                             if (data != null)
                             {
@@ -105,15 +117,24 @@ namespace friction_tester
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogException(ex);
-                            // Continue motion even if data collection fails
-                            continue;
+                            // If GetCurrentPosition or CollectDataAtPositionAsync fails, 
+                            // especially after an E-Stop (comm loss).
+                            Logger.Log($"Error during data collection loop in SpeedTest (iteration {i}): {ex.Message}. Breaking inner loop.");
+                            // Critical to break this inner loop if data collection is compromised.
+                            break; // Exit the while loop for this segment
                         }
-
                         await Task.Delay(10); // Non-blocking delay
                     }
-                    if (!_isSpeedTestRunning) break;
-                    await moveTask; // Ensure the move task is completed
+
+                    // After the while loop, check _isSpeedTestRunning before awaiting moveTask
+                    // as moveTask might throw OperationCanceledException if E-Stop occurred.
+                    if (!_isSpeedTestRunning) 
+                    {
+                        Logger.Log($"SpeedTestWindow: E-Stop detected after data collection loop (or loop broken by error) for repetition {i}. Breaking repetitions.");
+                        break; // Break the outer for-loop (repetitions)
+                    }
+                    
+                    await moveTask; // Ensure the move task is completed (or throws OperationCanceledException)
 
                     // Optional: Add a small delay between repetitions
                     await Task.Delay(100);
@@ -126,18 +147,18 @@ namespace friction_tester
             catch (Exception ex)
             {
                 Logger.LogException(ex);
-                if (_isSpeedTestRunning) // Only show error if test wasn't intentionally stopped
+                if (_isSpeedTestRunning) // Only show error if test wasn't intentionally stopped by EStop event handler already
                 {
                    MessageBox.Show(LocalizationHelper.GetLocalizedString("SpeedTestExecutionError"), LocalizationHelper.GetLocalizedString("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             finally
             {
-                if (_isSpeedTestRunning) // If test was running, mark it as completed for TestStateManager
+                if (notifiedStateManagerOfTestStart) // If this instance had notified the manager that a test started
                 {
                     TestStateManager.NotifyTestCompleted();
                 }
-                _isSpeedTestRunning = false; // Clear local flag
+                _isSpeedTestRunning = false; // Clear local UI/re-entrancy flag
                 Logger.Log("Speed test completed or exited.");
             }
             // MessageBox.Show("速度测试完成 Speed test completed.", "提示", MessageBoxButton.OK, MessageBoxImage.Information); // Show only on actual completion without error/E-stop

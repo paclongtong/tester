@@ -24,13 +24,14 @@ namespace friction_tester
         void EndHandwheelMode(short axisNum);
         int GetHandwheelInput();
         bool IsHandwheelMode { get; set; }
-
+        bool IsJoystickMode { get; set; } // Default to automatic mode
+        void StartEStopMonitorThread();
         void HandleExternalInput(int inputCode);
 
         void StartJoystickMode(short axisNum);
 
         void EndJoystickMode(short axisNum);
-        void StartEStopMonitor();
+        //void StartEStopMonitor();
 
         Task ResetEStop();
         event Action OnEStopTriggered;
@@ -38,6 +39,8 @@ namespace friction_tester
         Task ClearAxisAlarmAsync();
         Task ResetAxisAfterEStopAsync();
         bool IsAxisInAlarm();
+
+        void EStop();
 
 
     }

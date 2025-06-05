@@ -645,8 +645,57 @@ namespace friction_tester
 
         protected override void OnClosed(EventArgs e)
         {
+            Logger.Log("Application closing. Initiating shutdown procedures...");
+
+            if (_motorController != null)
+            {
+                try
+                {
+                    Logger.Log("Executing EStop to halt motion and turn off axis...");
+                    _motorController.EStop(); // This stops motion, turns off axis, and cancels moves
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Error during EStop on close: {ex.Message}");
+                    // Continue with shutdown despite error
+                }
+
+                // Stop the E-Stop monitoring thread
+                // Assuming _motorController is RealMotionController which has StopEStopMonitorThread
+                if (_motorController is RealMotionController realController)
+                {
+                    try
+                    {
+                        Logger.Log("Stopping E-Stop monitor thread...");
+                        realController.StopEStopMonitorThread();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"Error stopping E-Stop monitor thread: {ex.Message}");
+                    }
+                }
+                else if (_motorController is SimulatedMotionController)
+                {
+                    Logger.Log("Simulation mode: E-Stop monitor thread stop not applicable or handled by simulation controller.");
+                }
+
+                try
+                {
+                    Logger.Log("Closing motion card connection...");
+                    _motorController._motionCard?.GA_Close(); // Close the motion card connection
+                }
+                catch (Exception ex)
+                {
+                     Logger.Log($"Error closing motion card: {ex.Message}");
+                }
+            }
+            else
+            {
+                Logger.Log("_motorController is null during OnClosed. Cannot perform motor-specific shutdown.");
+            }
+
             _statusPanelViewModel?.Dispose();
-            _motorController._motionCard.GA_Close(); // Close the motion card connection
+            Logger.Log("Shutdown procedures complete. Calling base.OnClosed.");
             base.OnClosed(e);
         }
 
