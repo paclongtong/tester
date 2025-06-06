@@ -32,7 +32,7 @@ namespace friction_tester
         // New fields for dedicated E-Stop monitoring thread
         private Thread _eStopMonitorThread;
         private volatile bool _runEStopMonitor = false;
-        private readonly int _eStopPollIntervalMs = 100; // Poll every 20ms (was 50ms)
+        private readonly int _eStopPollIntervalMs = 50; // Poll every xx ms
 
         public void Initialize()
         {
@@ -42,7 +42,7 @@ namespace friction_tester
             _motionCard = new MultiCardCS.MultiCardCS();
             try
             {
-                _motionCard.GA_StartDebugLog(0);
+                //_motionCard.GA_StartDebugLog(0);
                 iRes = _motionCard.GA_Open(1, "192.168.0.200", 60000, "192.168.0.1", 60000);
                 if (iRes != 0)
                 {
@@ -59,8 +59,57 @@ namespace friction_tester
                 Task.Delay(500).Wait(); // Okay in Initialize
                 result = _motionCard.GA_ECatInit();
                 _motionCard.GA_ECatLoadOrgPosAbs(1);
-                Thread.Sleep(5000); // Okay in Initialize
+
+                Logger.Log("Waiting for EtherCAT slaves to be ready...");
+                bool slavesReady = false;
+                var stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
+                int pollingTimeoutMs = 6000; // timeout
+
+                while (stopwatch.ElapsedMilliseconds < pollingTimeoutMs)
+                {
+                    short nNumRunningSlave = 0;
+                    int ecatSlaveCountCode = _motionCard.GA_ECatGetSlaveCount(ref nNumRunningSlave);
+                    if (ecatSlaveCountCode == 0 && nNumRunningSlave > 0)
+                    {
+                        Logger.Log($"EtherCAT slaves are ready. Found {nNumRunningSlave} slave(s).");
+                        slavesReady = true;
+                        break;
+                    }
+                    Thread.Sleep(200); // Poll every 200ms
+                }
+
+                if (!slavesReady)
+                {
+                    Logger.Log($"Timeout waiting for EtherCAT slaves after {pollingTimeoutMs}ms. Initialization may fail.");
+                }
+
                 _motionCard.GA_AxisOn(AxisNumber);
+
+                Logger.Log($"Waiting for Axis {AxisNumber} to be enabled...");
+                bool axisEnabled = false;
+                const int AXIS_STATUS_ENABLE = 0x00000200;
+                stopwatch.Restart();
+                int axisEnableTimeoutMs = 3000; // timeout for axis to enable
+
+                while (stopwatch.ElapsedMilliseconds < axisEnableTimeoutMs)
+                {
+                    int status = 0;
+                    int pClock = 0;
+                    int stsResult = _motionCard.GA_GetSts(AxisNumber, ref status, 1, ref pClock);
+                    if (stsResult == 0 && (status & AXIS_STATUS_ENABLE) != 0)
+                    {
+                        Logger.Log($"Axis {AxisNumber} is enabled. Status: {status:X8}");
+                        axisEnabled = true;
+                        break;
+                    }
+                    Thread.Sleep(100);
+                }
+                stopwatch.Stop();
+                if (!axisEnabled)
+                {
+                    Logger.Log($"Timeout waiting for Axis {AxisNumber} to be enabled after {axisEnableTimeoutMs}ms.");
+                }
 
                 if (result != 0)
                 {
@@ -137,25 +186,9 @@ namespace friction_tester
                     short latchedHardwareEStop = 0;
                     int estopReadCode = _motionCard.GA_EStopGetSts(ref latchedHardwareEStop);
 
-                    if (latchedHardwareEStop == 1)
+                    bool ethercatCommError = false;
+                    if (latchedHardwareEStop != 1) // Only check EtherCAT if hardware E-Stop is NOT active
                     {
-                        if (!_eStopNotified) // Ensure we only process this once per E-Stop event until reset
-                        {
-                            Logger.Log("[EStop Poll] Hardware E-stop triggered via polling. Card should be handling physical stop. Software performing state cleanup.");
-                            _eStopNotified = true;
-                            // Hardware E-Stop is active; trust the card for physical stop.
-                            // Software should focus on its state, cancelling tasks, and notifying.
-                            _isMoving = false;      // Update internal state
-                            CancelMove();           // Cancel any ongoing C# async move task
-                            SetLightOutput("red");  // Update UI/feedback
-                            OnEStopTriggered?.Invoke(); // Notify application listeners
-                            // DO NOT call the full EStop() method here, to avoid re-issuing GA_Stop/GA_AxisOff
-                        }
-                    }
-                    // Only check EtherCAT if hardware E-Stop is NOT active AND not already notified
-                    else if (!_eStopNotified) 
-                    {
-                        bool ethercatCommError = false;
                         short nNumRunningSlave = 0;
                         int ecatSlaveCountCode = _motionCard.GA_ECatGetSlaveCount(ref nNumRunningSlave);
 
@@ -164,17 +197,29 @@ namespace friction_tester
                             ethercatCommError = true;
                             Logger.Log($"[EStop Poll] GA_ECatGetSlaveCount call failed. Code: {ecatSlaveCountCode}. Triggering E-Stop.");
                         }
-                        else if (nNumRunningSlave == 0) 
+                        else if (nNumRunningSlave == 0)
                         {
                             ethercatCommError = true;
                             Logger.Log($"[EStop Poll] EtherCAT communication error: No running slaves detected (nNumRunningSlave = 0). Triggering E-Stop.");
                         }
+                    }
 
-                        if (ethercatCommError)
+                    // If either a hardware E-Stop is latched OR an EtherCAT communication error occurred
+                    if (latchedHardwareEStop == 1 || ethercatCommError)
+                    {
+                        if (!_eStopNotified) // Ensure we only process this once per E-Stop event until reset
                         {
-                            Logger.Log("[EStop Poll] EtherCAT communication error. Triggering software E-Stop.");
+                            if (latchedHardwareEStop == 1)
+                            {
+                                Logger.Log("[EStop Poll] Hardware E-stop triggered via polling. Initiating full EStop sequence.");
+                            }
+                            else // Implies ethercatCommError is true
+                            {
+                                Logger.Log("[EStop Poll] EtherCAT communication error detected. Initiating full EStop sequence.");
+                            }
+                            
                             _eStopNotified = true;
-                            EStop(); // Full software-initiated EStop: GA_Stop, GA_AxisOff, CancelMove, etc.
+                            EStop(); // Call the common EStop method (includes GA_Stop, GA_AxisOff, CancelMove)
                             SetLightOutput("red");
                             OnEStopTriggered?.Invoke();
                         }
@@ -502,6 +547,7 @@ namespace friction_tester
                 // These actions are critical for software state and should always be attempted.
                 _isMoving = false;
                 CancelMove(); // This cancels the CancellationToken for MoveToPositionAsync
+                SetLightOutput("red"); // Set light to red to indicate E-Stop
                 Logger.Log("EStop: _isMoving set to false and CancelMove() called.");
             }
         }
@@ -891,7 +937,7 @@ namespace friction_tester
 
                 // Small delay to ensure alarm is cleared
                 await Task.Delay(100);
-
+                SetLightOutput("yellow");
                 // Re-enable the axis
                 int result = _motionCard.GA_AxisOn(AxisNumber);
                 Logger.Log($"[RealMotionController] GA_AxisOn(Axis: {AxisNumber}) after EStop returned: {result}");

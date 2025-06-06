@@ -67,7 +67,7 @@ namespace friction_tester
             {
                 Logger.Log($"Moving to start position: {x1}mm");
                 await _motorController.MoveToPositionAsync(x1 * 1000, (int)speed, acceleration, _moveCancellationTokenSource.Token); // question
-                _motorController.HandleExternalInput(1);
+                _motorController.SetLightOutput("green");
                 Logger.Log($"Moving to end position: {x2}mm with data collection");
                 var moveTask = _motorController.MoveToPositionAsync(x2 * 1000, (int)speed, acceleration, _moveCancellationTokenSource.Token);
                 while (!_motorController.IsMovementDone())
@@ -93,7 +93,7 @@ namespace friction_tester
                 await moveTask; // Ensure the move task is completed
                 var sensorDataList = _dataAcquisition.GetBuffer();
                 await StoreTestResultAsync(sensorDataList, testName, speed, acceleration, x1, x2, workpieceName);
-                _motorController.HandleExternalInput(2);
+                _motorController.SetLightOutput("yellow");
                 Logger.Log($"Test completed successfully: {testName}");
                 _dataAcquisition.ClearBuffer();
             }
@@ -123,7 +123,7 @@ namespace friction_tester
         public async Task ResetPosition()
         {
             Logger.Log("[TestController] ResetPosition called.");
-            _motorController.HandleExternalInput(2); // Light Green
+            
             try
             {
                 // Check if we need to reset axis after emergency stop
@@ -143,14 +143,13 @@ namespace friction_tester
                 double speed = ConfigManager.Config.Axes[0].HomeReturnSpeed;
                 double acceleration = 20; // Default acceleration for reset
                 Logger.Log($"[TestController] ResetPosition: Speed={speed}, Acceleration={acceleration}. Moving to position 0.");
-
-                _motorController.HandleExternalInput(1); // Light Yellow
+                _motorController.SetLightOutput("green"); // Light Green
                 using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60))) // 60 second timeout
                 {
                     await _motorController.MoveToPositionAsync(0, 50, 1000, cts.Token);
                 }
                 Logger.Log("[TestController] ResetPosition: MoveToPositionAsync(0) completed.");
-                _motorController.HandleExternalInput(2); // Light Green
+                _motorController.SetLightOutput("yellow"); // Light yellow
             }
             catch (Exception ex)
             {
@@ -177,7 +176,7 @@ namespace friction_tester
                 }
                 _moveCancellationTokenSource?.Cancel();
                 _motorController.Stop();
-                _motorController.HandleExternalInput(2);
+                _motorController.SetLightOutput("yellow");
                 _dataAcquisition.ClearBuffer();
                 Logger.Log("Emergency stop triggered. Motion halted. Test stopped and buffer cleared.\r " +
                     "紧急停止触发，测试停止");

@@ -70,6 +70,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="lib\MultiCardCLR.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="lib\MultiCardCS.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Page Update="Resources\Strings.en-US.xaml">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </Page>

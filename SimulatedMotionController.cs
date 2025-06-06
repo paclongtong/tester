@@ -75,6 +75,7 @@ public class SimulatedMotionController : IMotionController
 
     public void HandleExternalInput(int inputCode)
     { return; }
+    public void SetLightOutput(string color) { return; }
 
     public Task MoveToPositionAsync(double position, int maxVelocity, double acceleration, CancellationToken cancellationToken = default)
     {

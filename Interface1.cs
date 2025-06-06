@@ -27,6 +27,7 @@ namespace friction_tester
         bool IsJoystickMode { get; set; } // Default to automatic mode
         void StartEStopMonitorThread();
         void HandleExternalInput(int inputCode);
+        void SetLightOutput(string color);
 
         void StartJoystickMode(short axisNum);
 

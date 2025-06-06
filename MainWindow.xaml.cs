@@ -616,6 +616,7 @@ namespace friction_tester
         private void ResetEstop_Click(object sender, RoutedEventArgs e)
         {
             _motorController.ResetEStop();
+            _motorController.SetLightOutput("yellow");
             // re-enable jog buttons (or other UI)
             MessageBox.Show(LocalizationHelper.GetLocalizedString("EStopClearedResume"), LocalizationHelper.GetLocalizedString("EStopResetTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }

@@ -84,11 +84,11 @@ namespace friction_tester
             notifiedStateManagerOfTestStart = true; // Mark that this instance notified the manager
             try
             {
+                _motionController.SetLightOutput("green");
                 _motionController._motionCard.GA_AxisOn(1); // Ensure the axis is powered on
                 for (int i = 0; i < repetitions; i++)
                 {
-                    if (!_isSpeedTestRunning) break; // Check if E-stop or close occurred
-
+                    if (!_isSpeedTestRunning) break; // Check if E-stop or close 
                     await _motionController.MoveToPositionAsync(startPos * 1000, maxVelocity, acceleration); // 1000 pulses per mm by default
                     if (!_isSpeedTestRunning) break;
 
@@ -158,6 +158,7 @@ namespace friction_tester
                 {
                     TestStateManager.NotifyTestCompleted();
                 }
+                _motionController.SetLightOutput("yellow");
                 _isSpeedTestRunning = false; // Clear local UI/re-entrancy flag
                 Logger.Log("Speed test completed or exited.");
             }
